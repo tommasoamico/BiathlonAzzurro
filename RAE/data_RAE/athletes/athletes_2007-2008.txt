@@ -1,0 +1,177 @@
+No	Family Name	Given Name	Nation	Races	"World CupRank"	"Rank(avg)"	"Points(avg)"	Wins	2nd	3rd	Podiums	Top5s	Top10s	Top20s	Top30s	Top40s	>40	LAP	DNF	DSQ
+1	Bjoerndalen	Ole Einar	NOR	22	1	5.3	37.8	7	5	2	14	16	19	21	22	22	0	0	0	0
+2	Svendsen	Emil Hegle	NOR	20	3	7.7	34.4	6	1	4	11	11	13	18	20	20	0	0	0	0
+3	Greis	Michael	GER	23	4	12.4	25.9	4	0	2	6	8	14	17	19	22	0	0	1	0
+4	Sikora	Tomasz	POL	23	12	17.0	17.7	2	1	0	3	3	6	16	21	21	2	0	0	0
+5	Tcherezov	Ivan	RUS	24	5	13.4	22.9	2	0	0	2	6	11	21	21	23	1	0	0	0
+6	Tchoudov	Maxim	RUS	19	7	14.8	27.1	1	3	2	6	9	13	14	15	16	3	0	0	0
+7	Yaroshenko	Dmitri	RUS	25	2	15.3	27.8	1	3	1	5	8	17	22	23	23	2	0	0	0
+8	Ferry	Bjoern	SWE	23	6	14.7	23.7	1	1	0	2	6	12	18	21	21	2	0	0	0
+9	Slesingr	Michal	CZE	23	19	21.4	14.1	1	0	1	2	3	7	11	16	20	2	0	1	0
+10	Defrasne	Vincent	FRA	21	15	17.2	17.3	1	0	0	1	2	7	15	18	20	1	0	0	0
+11	Hanevold	Halvard	NOR	24	8	17.0	19.7	0	4	1	5	8	10	16	19	23	1	0	0	0
+12	Kruglov	Nikolay	RUS	20	9	12.7	23.5	0	4	0	4	6	11	15	20	20	0	0	0	0
+13	Pinter	Friedrich	AUT	21	16	19.7	17.4	0	1	2	3	5	8	11	17	19	2	0	0	0
+14	Wolf	Alexander	GER	25	14	21.4	16.3	0	1	2	3	3	9	15	19	21	4	0	0	0
+15	Graf	Daniel	GER	24	13	21.0	18.5	0	1	1	2	5	9	16	18	21	3	0	0	0
+16	Roesch	Michael	GER	26	11	17.8	18.3	0	1	0	1	4	8	18	21	24	2	0	0	0
+17	Makoveev	Andrei	RUS	19	20	22.3	16.2	0	0	3	3	4	4	12	13	13	5	0	1	0
+18	Os	Alexander	NOR	21	24	25.6	12.3	0	0	1	1	2	5	8	14	17	4	0	0	0
+19	Nilsson	Mattias	SWE	23	22	24.3	11.3	0	0	1	1	2	3	10	18	20	3	0	0	0
+20	Maksimov	Maxim	RUS	11	33	22.8	14.1	0	0	1	1	2	2	4	10	10	1	0	0	0
+21	Pump	Carsten	GER	21	34	31.2	7.4	0	0	1	1	1	2	5	12	16	4	0	1	0
+22	Sednev	Serguei	UKR	15	46	42.7	5.0	0	0	1	1	1	1	2	6	7	8	0	0	0
+23	Fourcade	Simon	FRA	26	17	24.1	13.5	0	0	0	0	3	6	14	17	17	7	1	1	0
+24	Mesotitsch	Daniel	AUT	25	26	28.3	8.7	0	0	0	0	2	3	8	14	18	6	0	1	0
+25	Bergman	Carl Johan	SWE	21	28	26.6	8.0	0	0	0	0	2	2	5	16	17	3	0	1	0
+26	Birnbacher	Andreas	GER	22	10	13.6	21.9	0	0	0	0	1	12	18	20	22	0	0	0	0
+27	Zhang	Chengye	CHN	21	21	24.0	13.9	0	0	0	0	1	5	11	15	19	2	0	0	0
+28	Brattsveen	Rune	NOR	21	23	20.5	13.5	0	0	0	0	1	3	12	17	21	0	0	0	0
+29	Andresen	Frode	NOR	17	30	28.5	9.8	0	0	0	0	1	3	6	10	12	4	0	1	0
+30	Aidarov	Alexei	UKR	18	39	37.8	5.3	0	0	0	0	1	2	2	6	13	5	0	0	0
+31	Moravec	Ondrej	CZE	16	45	40.7	5.1	0	0	0	0	1	1	4	4	7	9	0	0	0
+32	Rozhkov	Sergei	RUS	3	50	16.0	19.3	0	0	0	0	1	1	2	3	3	0	0	0	0
+33	Berezhnoy	Oleg	UKR	5	57	59.6	8.0	0	0	0	0	1	1	1	1	1	4	0	0	0
+34	Eder	Simon	AUT	22	18	19.1	14.5	0	0	0	0	0	5	14	20	21	1	0	0	0
+35	Burke	Tim	USA	19	29	30.1	9.0	0	0	0	0	0	4	6	11	14	5	0	0	0
+36	Churine	Alexey	RUS	19	27	29.8	9.1	0	0	0	0	0	3	8	12	13	6	0	0	0
+37	Hallenbarter	Simon	SUI	25	25	30.1	9.4	0	0	0	0	0	2	8	15	18	7	0	0	0
+38	Vitek	Zdenek	CZE	17	35	40.1	7.8	0	0	0	0	0	2	6	8	9	8	0	0	0
+39	Prokunin	Andrei	RUS	11	41	27.8	8.2	0	0	0	0	0	2	4	5	10	1	0	0	0
+40	Deryzemlya	Andriy	UKR	16	48	40.7	3.8	0	0	0	0	0	2	3	4	7	8	0	1	0
+41	Stephan	Christoph	GER	20	31	30.1	8.3	0	0	0	0	0	1	8	13	16	4	0	0	0
+42	De Lorenzi	Christian	ITA	20	36	34.5	6.1	0	0	0	0	0	1	4	12	14	6	0	0	0
+43	Bauer	Klemen	SLO	18	44	45.3	4.6	0	0	0	0	0	1	3	7	8	10	0	0	0
+44	Eckhoff	Stian	NOR	9	43	24.3	9.6	0	0	0	0	0	1	3	6	8	1	0	0	0
+45	Hakkinen	Jay	USA	16	47	46.4	4.7	0	0	0	0	0	1	3	5	7	9	0	0	0
+46	Hafsas	Ronny	NOR	6	42	19.7	14.7	0	0	0	0	0	1	3	5	5	1	0	0	0
+47	Valiullin	Rustam	BLR	18	51	45.9	3.1	0	0	0	0	0	1	3	4	6	12	0	0	0
+48	Bilanenko	Olexander	UKR	8	58	40.3	5.0	0	0	0	0	0	1	1	3	4	4	0	0	0
+49	Gusev	Artem	RUS	2	60	17.0	18.5	0	0	0	0	0	1	1	2	2	0	0	0	0
+50	Clegg	Robin	CAN	10	65	60.1	3.0	0	0	0	0	0	1	1	1	2	8	0	0	0
+51	Sumann	Christoph	AUT	19	32	28.1	8.0	0	0	0	0	0	0	7	14	15	4	0	0	0
+52	Bricis	Ilmars	LAT	16	38	36.9	7.2	0	0	0	0	0	0	6	6	11	5	0	0	0
+53	Plywaczyk	Krzysztof	POL	21	37	35.6	5.5	0	0	0	0	0	0	5	9	13	8	0	0	0
+54	Simmen	Matthias	SUI	21	40	34.2	4.5	0	0	0	0	0	0	4	9	14	6	0	1	0
+55	Gjedrem	Hans Martin	NOR	9	53	33.9	6.3	0	0	0	0	0	0	3	5	7	2	0	0	0
+56	Hurajt	Pavol	SVK	13	56	49.0	3.4	0	0	0	0	0	0	3	5	6	7	0	0	0
+57	Derkach	Vyacheslav	UKR	19	49	35.4	3.4	0	0	0	0	0	0	2	9	13	6	0	0	0
+58	Robert	Julien	FRA	15	62	41.5	2.3	0	0	0	0	0	0	2	4	7	8	0	0	0
+59	Soukup	Jaroslav	CZE	14	54	45.6	3.6	0	0	0	0	0	0	2	4	6	8	0	0	0
+60	Habert	Lois	FRA	21	55	41.3	2.2	0	0	0	0	0	0	2	3	10	11	0	0	0
+61	Landertinger	Dominik	AUT	10	61	39.9	3.7	0	0	0	0	0	0	2	3	3	7	0	0	0
+62	Lessing	Roland	EST	16	67	47.6	1.7	0	0	0	0	0	0	2	2	6	10	0	0	0
+63	Novikov	Sergey	BLR	17	52	42.1	3.4	0	0	0	0	0	0	1	7	8	9	0	0	0
+64	Antila	Timo	FIN	16	59	40.1	2.2	0	0	0	0	0	0	1	5	10	6	0	0	0
+65	Bailey	Lowell	USA	16	64	47.6	1.9	0	0	0	0	0	0	1	4	5	11	0	0	0
+66	Ekholm	David	SWE	15	69	41.9	1.4	0	0	0	0	0	0	1	3	7	8	0	0	0
+67	Martinelli	Christian	ITA	17	68	47.3	1.5	0	0	0	0	0	0	1	3	6	11	0	0	0
+68	Holubec	Tomas	CZE	15	63	45.9	2.2	0	0	0	0	0	0	1	3	4	11	0	0	0
+69	Windisch	Markus	ITA	16	71	49.2	1.1	0	0	0	0	0	0	1	2	8	8	0	0	0
+70	Matiasko	Marek	SVK	13	74	52.5	1.2	0	0	0	0	0	0	1	2	3	10	0	0	0
+71	Jonsson	Magnus	SWE	11	66	48.1	2.5	0	0	0	0	0	0	1	2	3	8	0	0	0
+72	Dostal	Roman	CZE	15	75	45.1	1.0	0	0	0	0	0	0	1	1	8	7	0	0	0
+73	Vuillermoz	Rene Laurent	ITA	18	70	51.2	1.0	0	0	0	0	0	0	1	1	6	11	0	1	0
+74	Boeuf	Alexis	FRA	5	76	39.2	3.0	0	0	0	0	0	0	1	1	3	2	0	0	0
+75	Eberhard	Tobias	AUT	10	80	56.7	1.0	0	0	0	0	0	0	1	1	2	8	0	0	0
+76	Cannard	Ferreol	FRA	18	72	43.6	1.0	0	0	0	0	0	0	0	4	8	10	0	0	0
+77	Jay	Vincent	FRA	13	83	50.0	0.7	0	0	0	0	0	0	0	4	5	8	0	0	0
+78	Berger	Lars	NOR	7	78	35.1	2.0	0	0	0	0	0	0	0	4	4	3	0	0	0
+79	Le Guellec	Jean-Philippe	CAN	17	77	48.5	0.9	0	0	0	0	0	0	0	3	6	11	0	0	0
+80	Tobreluts	Indrek	EST	15	85	46.5	0.5	0	0	0	0	0	0	0	3	5	10	0	0	0
+81	Kauppinen	Jarkko	FIN	11	73	47.9	1.5	0	0	0	0	0	0	0	3	4	7	0	0	0
+82	Zhang	Qing	CHN	13	79	53.2	0.9	0	0	0	0	0	0	0	2	5	8	0	0	0
+83	Frei	Thomas	SUI	13	89	48.0	0.2	0	0	0	0	0	0	0	1	4	9	0	0	0
+84	Cola	Mattia	ITA	8	90	61.9	0.3	0	0	0	0	0	0	0	1	3	5	0	0	0
+85	Kazar	Matej	SVK	8	84	59.4	1.0	0	0	0	0	0	0	0	1	3	5	0	0	0
+86	Boeckli	Claudio	SUI	9	87	57.8	0.6	0	0	0	0	0	0	0	1	2	6	0	1	0
+87	Ren	Long	CHN	14	86	61.7	0.4	0	0	0	0	0	0	0	1	2	12	0	0	0
+88	Syman	Alexandr	BLR	14	81	54.1	0.7	0	0	0	0	0	0	0	1	2	12	0	0	0
+89	Chervyakov	Alexandr	KAZ	11	91	67.4	0.3	0	0	0	0	0	0	0	1	1	10	0	0	0
+90	Kochkin	Mikhail	RUS	5	88	46.6	0.8	0	0	0	0	0	0	0	1	1	4	0	0	0
+91	Gredler	Ludwig	AUT	6	82	65.3	1.4	0	0	0	0	0	0	0	1	1	5	0	0	0
+92	Joller	Ivan	SUI	8		61.8	0.0	0	0	0	0	0	0	0	0	2	6	0	0	0
+93	Dokl	Peter	SLO	15		59.8	0.0	0	0	0	0	0	0	0	0	2	13	0	0	0
+94	Brvar	Gregor	SLO	12		59.4	0.0	0	0	0	0	0	0	0	0	2	10	0	0	0
+95	Knie	Christoph	GER	3		44.0	0.0	0	0	0	0	0	0	0	0	2	1	0	0	0
+96	Lang	Toni	GER	2		35.0	0.0	0	0	0	0	0	0	0	0	2	0	0	0	0
+97	Tian	Ye	CHN	10		67.5	0.0	0	0	0	0	0	0	0	0	1	9	0	0	0
+98	Brink	Jörgen	SWE	7		65.0	0.0	0	0	0	0	0	0	0	0	1	6	0	0	0
+99	Teela	Jeremy	USA	12		64.4	0.0	0	0	0	0	0	0	0	0	1	11	0	0	0
+100	Isa	Hidenori	JPN	7		63.0	0.0	0	0	0	0	0	0	0	0	1	6	0	0	0
+101	Kasahara	Tatsumi	JPN	7		61.3	0.0	0	0	0	0	0	0	0	0	1	6	0	0	0
+102	Anev	Krasimir	BUL	7		57.4	0.0	0	0	0	0	0	0	0	0	1	6	0	0	0
+103	Garnita	Razvan	ROU	2		118.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+104	Petrovic	Milanko	SRB	4		113.0	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+105	Jeremic	Nikola	SRB	2		113.0	0.0	0	0	0	0	0	0	0	0	0	1	0	1	0
+106	Tagscherer	Zoltan	HUN	4		108.0	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+107	Hill	Stephen	GBR	3		107.0	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+108	Langer	Thorsten	BEL	4		106.5	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+109	Laponder	Marcel	GBR	1		105.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+110	Milenkovic	Aleksandar	SRB	4		104.8	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+111	Icoski	Gjorgji	MKD	5		102.2	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0
+112	Langer	Pascal	BEL	6		101.8	0.0	0	0	0	0	0	0	0	0	0	6	0	0	0
+113	Naveau	Vincent	BEL	3		101.7	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+114	Shesler	Alexandr	KAZ	2		101.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+115	Christoforidis	Stavros	GRE	2		101.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+116	Cosic	Miro	BIH	1		101.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+117	Kane	Kevin	GBR	4		100.8	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+118	Raymond	Mark	AUS	10		100.6	0.0	0	0	0	0	0	0	0	0	0	10	0	0	0
+119	Park	Byung-Joo	KOR	6		100.2	0.0	0	0	0	0	0	0	0	0	0	5	0	0	1
+120	Kiourkenidis	Efstathios	GRE	5		99.2	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0
+121	Allanson	Simon	GBR	2		99.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+122	Rastic	Damir	SRB	9		98.9	0.0	0	0	0	0	0	0	0	0	0	8	0	1	0
+123	Kosarac	Nemanja	BIH	6		98.3	0.0	0	0	0	0	0	0	0	0	0	6	0	0	0
+124	Witek	Sebastian	POL	4		97.5	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+125	Slettemark	Oystein	GRL	9		97.1	0.0	0	0	0	0	0	0	0	0	0	9	0	0	0
+126	Iliev	Vladimir	BUL	1		96.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+127	Mosoiu	Cristian Marian	ROU	5		96.0	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0
+128	Saito	Shinya	JPN	2		95.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+129	Nagai	Junji	JPN	2		95.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+130	Tagscherer	Imre	HUN	10		93.7	0.0	0	0	0	0	0	0	0	0	0	10	0	0	0
+131	Gombos	Karoly	HUN	2		93.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+132	Kasslatter	Armin	ITA	2		92.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+133	Beltrame	Sebastian	ARG	1		92.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+134	Remmelg	Alari	EST	1		91.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+135	Simocko	Dusan	SVK	1		89.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+136	Piksons	Edgars	LAT	5		88.4	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0
+137	Dashkevich	Sergey	BLR	2		88.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+138	Kwak	Adam	POL	4		88.0	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+139	Pukki	Tapio	FIN	2		87.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+140	Smith	Nathan	CAN	2		86.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+141	Keneshev	Dias	KAZ	2		86.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+142	Berzins	Janis	LAT	1		84.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+143	Tsakiris	Athanasios	GRE	3		83.0	0.0	0	0	0	0	0	0	0	0	0	2	0	1	0
+144	Lee	Inbok	KOR	13		82.0	0.0	0	0	0	0	0	0	0	0	0	12	1	0	0
+145	Jackson	Lee-Steve	GBR	12		81.8	0.0	0	0	0	0	0	0	0	0	0	12	0	0	0
+146	Matiasko	Miroslav	SVK	3		81.0	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+147	Currier	Russell	USA	1		79.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+148	Vasilev	Kiril	BUL	2		78.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+149	Rupnik	Vasja	SLO	8		77.6	0.0	0	0	0	0	0	0	0	0	0	7	1	0	0
+150	Beatrix	Jean Guillaume	FRA	1		77.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+151	Viigipuu	Karel	EST	1		77.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+152	Hradecky	Petr	CZE	2		77.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+153	Perras	Scott	CAN	10		76.6	0.0	0	0	0	0	0	0	0	0	0	10	0	0	0
+154	Cool	Herbert	NED	11		76.2	0.0	0	0	0	0	0	0	0	0	0	11	0	0	0
+155	Pozzi	Nicola	ITA	1		76.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+156	Libietis	Kristaps	LAT	9		75.2	0.0	0	0	0	0	0	0	0	0	0	9	0	0	0
+157	Maentaeri	Marko	FIN	7		74.6	0.0	0	0	0	0	0	0	0	0	0	7	0	0	0
+158	Viks	Priit	EST	5		73.4	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0
+159	Fak	Jakov	CRO	7		72.1	0.0	0	0	0	0	0	0	0	0	0	7	0	0	0
+160	Naumik	Sergey	KAZ	6		71.8	0.0	0	0	0	0	0	0	0	0	0	6	0	0	0
+161	Rudenchyk	Vitaliy	BUL	11		71.0	0.0	0	0	0	0	0	0	0	0	0	11	0	0	0
+162	Shetalin	Vasiliy	BLR	6		71.0	0.0	0	0	0	0	0	0	0	0	0	6	0	0	0
+163	Jean	Frederic	FRA	4		70.5	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+164	Koiv	Kauri	EST	7		70.3	0.0	0	0	0	0	0	0	0	0	0	7	0	0	0
+165	Pleiksnis	Janis	LAT	2		70.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+166	Pryma	Roman	UKR	3		70.0	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+167	Ughetto	Julien	FRA	1		70.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+168	Kolos	Oleksandr	UKR	1		70.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+169	Kletcherov	Michail	BUL	15		67.9	0.0	0	0	0	0	0	0	0	0	0	15	0	0	0
+170	Borjesson	Jakob	SWE	6		67.8	0.0	0	0	0	0	0	0	0	0	0	6	0	0	0
+171	Porret	Vincent	FRA	2		66.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+172	Miklashevsky	Vladimir	BLR	5		65.2	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0
+173	Dumbris	Kaspars	LAT	9		64.8	0.0	0	0	0	0	0	0	0	0	0	9	0	0	0
+174	Kinnunen	Jouni	FIN	2		63.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+175	Fourcade	Martin	FRA	1		61.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+176	Eberhard	Julian	AUT	5		54.8	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0

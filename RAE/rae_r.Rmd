@@ -1,0 +1,297 @@
+# The relative age effect in professional biathlon
+This Rmarkdown notebook is a piece of a more broad work that sees the biggest part of the data processing part developed in Python.
+The goal is to inspect the relative age effect (RAE) in professional biathlon. A Poisson one-sided hypothesis test is performed on a group of selected nations and a further inspection is done on the most competitive nations.
+
+
+
+
+
+
+```{r}
+library(ggplot2)
+library(rjson)
+library(sfsmisc)
+library(coda)
+library(rjags)
+```
+
+
+
+```{r}
+# Importing the Json data into a list
+json_data <- fromJSON(file='Rdata.json')
+```
+
+
+
+
+```{r}
+# Declaring the variables mean and standard deviation for the priors
+mean_early <- json_data$data_num$mean$early
+mean_late <- json_data$data_num$mean$late
+std_early <-json_data$data_num$std$early
+std_late <-json_data$data_num$std$late
+```
+
+
+```{r}
+# Declaring the variables mean and standard deviation for the priors of the elite nations
+mean_early_nor <- json_data$data_nor$mean$early
+mean_late_nor <- json_data$data_nor$mean$late
+std_early_nor <-json_data$data_nor$std$early
+std_late_nor <-json_data$data_nor$std$late
+```
+
+```{r}
+# Defining the functions to map mean and std to the parameters of the beta
+alpha_gamma <- function(mean, std){
+  return( (mean^2)/(std^2) )
+}
+
+beta_gamma <- function(mean, std){
+  return( (mean)/(std) )
+}
+```
+
+
+
+```{r}
+# Finding the parameters of the beta
+alpha_prior_early <- alpha_gamma(mean_early, std_early)
+alpha_prior_late <- alpha_gamma(mean_late, std_late)
+alpha_prior_early_nor <- alpha_gamma(mean_early_nor, std_early_nor)
+alpha_prior_late_nor <- alpha_gamma(mean_late_nor, std_late_nor)
+```
+
+
+```{r}
+# Finding the parameters of the beta
+beta_prior_early <- beta_gamma(mean_early, std_early)
+beta_prior_late <- beta_gamma(mean_late, std_late)
+beta_prior_early_nor <- beta_gamma(mean_early_nor, std_early_nor)
+beta_prior_late_nor <- beta_gamma(mean_late_nor, std_late_nor)
+```
+
+```{r}
+# Retrieving data for the inference
+y_early <- json_data$first_six$first_six_num
+y_late <- json_data$second_six$second_six_num
+
+y_early_nor <- json_data$first_six$first_six_nor
+y_late_nor <- json_data$second_six$second_six_nor
+```
+
+
+```{r}
+# Updating the parameters for the inference
+alpha_post_early <- alpha_prior_early + y_early
+alpha_post_late <- alpha_prior_late + y_late
+
+alpha_post_early_nor <- alpha_prior_early_nor + y_early_nor
+alpha_post_late_nor <- alpha_prior_late_nor + y_late_nor
+```
+
+```{r}
+# Setting the random seed
+set.seed(123)
+```
+
+
+```{r}
+# Updating the parameters for the inference
+n <- json_data$tot_years
+
+
+beta_post_early <- beta_prior_early + n
+beta_post_late <- beta_prior_late + n
+
+beta_post_early_nor <- beta_prior_early_nor + n
+beta_post_late_nor <- beta_prior_late_nor + n
+```
+
+
+
+
+```{r}
+options(repr.plot.width=15, repr.plot.width=7)
+x_axis_1 = seq(0, 9, length.out=1000)
+plot <- ggplot() +
+  geom_line(aes(x = x_axis_1, y = dgamma(x = x_axis_1, shape = alpha_post_early, 
+                                         rate = beta_post_early), 
+                                        color='Early borns'), lwd=1.5) +
+  geom_line(aes(x = x_axis_1, y = dgamma(x = x_axis_1, shape = alpha_post_late, rate = beta_post_late),
+                                        color='Late borns'), lwd=1.5) +
+  ylim(0,1.3) +
+  labs(color='Legend', title = 'Poisson distribution of early and late borns', y='PDF', 
+       x='Events per year') +
+  theme_bw()
+
+plot
+```
+
+```{r}
+mean_f <- alpha_post_early/beta_post_early - alpha_post_late/beta_post_late
+std_f <- sqrt((alpha_post_early/beta_post_early^2)^2 + (alpha_post_late/beta_post_late^2)^2)
+
+
+mean_f_nor <- alpha_post_early_nor/beta_post_early_nor - alpha_post_late_nor/beta_post_late_nor
+std_f_nor <- sqrt((alpha_post_early_nor/(beta_post_early_nor^2))^2+(
+  alpha_post_late_nor/(beta_post_late^2))^2)
+```
+
+
+## Numerical arroximation
+Due to the fact that the difference between two gamma distributions is quite the complicated issue, we rely to numerical approximations to perform the hypothesis testing.
+We in fact plot the histogram of the difference between the two distribution by taking the difference between two sampled sets. We then integrate the density approximation of the curve after normalizing it: the density estimate has indeed a numerical integral that is slightly removed from 1.
+
+
+ 
+```{r}
+# Creating the two sampled sets
+sim_early <- rgamma(n = 10000, shape = alpha_post_early, 
+                                         rate = beta_post_early)
+sim_late <- rgamma(n = 10000, shape = alpha_post_late, 
+                                         rate = beta_post_late)
+
+sim_diff = sim_early - sim_late
+
+
+sim_early_nor <- rgamma(n = 10000, shape = alpha_post_early_nor, 
+                                         rate = beta_post_early_nor)
+sim_late_nor <- rgamma(n = 10000, shape = alpha_post_late_nor, 
+                                         rate = beta_post_late_nor)
+
+sim_diff_nor = sim_early_nor - sim_late_nor
+
+
+```
+
+
+```{r}
+# Defining the Freedman-Diaconis rule in order to apply it for the bin's choice
+bins_fd <- function(vec) {
+  diff(range(vec)) / (2 * IQR(vec) / length(vec)^(1/3))
+}
+```
+
+
+
+```{r}
+# Numerical integration
+density_est_num <-  density(sim_diff)
+lower_dens_x_num <- density_est_num$x[density_est_num$x < 0]
+lower_dens_y_num <- density_est_num$y[density_est_num$x < 0]
+integral_num <- integrate.xy(x = lower_dens_x_num, fx = lower_dens_y_num) 
+
+integral_num
+```
+
+```{r}
+# Finding the right normalization factor
+norm_int = integrate.xy(x = density_est_num$x, fx=density_est_num$y)
+norm_int
+```
+
+
+
+```{r}
+x_axis = seq(-10, 10, length.out=1000)
+x_ribbon <- seq(-10, 0, length.out=1000)
+
+
+
+plot <- ggplot() +
+    geom_histogram((aes(x = sim_diff, y=..density..)), bins=bins_fd(sim_diff), color='white',
+                    fill='navy',alpha=0.8)+
+  labs(title = 'Differenza tra nati nel 1° e nel 4° quadrimestre', y='PDF', x='Differenza del numero di eventi annuali') +
+  #geom_line(aes(x = x_axis, y = dnorm(x = x_axis, mean = mean_f, sd = std_f)), color='firebrick', 
+   #         lwd = 1.5 ) +
+  geom_line(aes(x = density_est_num$x, y=density_est_num$y/norm_int), color='firebrick', lwd=1.5) +
+
+  geom_ribbon(aes(x = lower_dens_x_num, ymin=0, ymax=lower_dens_y_num), 
+              fill='cyan2', color='black', alpha=0.5, lwd=1)+
+  geom_segment(aes(x = 0, xend=0, y=0, yend=lower_dens_y_num), lwd=1) +
+  theme_bw() +
+  annotate('text', x=-2.3, y=0.1, label= sprintf('Valore dell\'integrale = %s', round(integral_num, 3))) +
+   geom_segment(aes(x = -0.3, y = 0.1, xend = -1.3, yend = 0.1),
+                  arrow = arrow(length = unit(0.3, "cm"))) +
+  
+  scale_x_continuous(limits = c(-3, 2.5))
+  
+
+ylim(0,0.35) 
+
+plot 
+
+```
+
+## Hypothesis test results
+We can see how, setting the significance level to 10% we can reject the null hypothesis of late born being more present in the word cup than early born. Our conclusion is that with 90% probability an effect shifting the distribution toward athletes born in the first trimester can be detected with our hypothesis testing. 
+
+
+
+
+
+```{r}
+# Numerical integration for the elite nations
+density_est <-  density(sim_diff_nor)
+lower_dens_x <- density_est$x[density_est$x < 0]
+lower_dens_y <- density_est$y[density_est$x < 0]
+integral_nor <- integrate.xy(lower_dens_x, lower_dens_y) 
+
+integral_nor
+```
+
+
+
+
+
+```{r}
+plot <- ggplot() +
+        geom_histogram(aes(x= sim_diff_nor, y=..density..), bins = bins_fd(sim_diff_nor), 
+                       fill='navy', color='white', alpha=0.8) +
+        geom_line(aes(x= density_est$x, y= density_est$y), lwd=1.5, color='firebrick') +
+        geom_ribbon(aes(x = lower_dens_x, ymin=0, ymax=lower_dens_y), 
+                    fill='cyan2', color='black', alpha=0.5, lwd=1)+
+        annotate('text', x=-0.5, y=0.5, label= sprintf('Integral value = %s', round(integral_nor, 3))) +
+        geom_segment(aes(x = -0.2, y = 0.07, xend = -0.3, yend = 0.45),
+                  arrow = arrow(length = unit(0.3, "cm"))) +
+        geom_segment(aes(x = 0, xend=0, y=0, yend=lower_dens_y), lwd=1) +
+        labs(title = 'Difference between late and early borns in Norway', 
+             x='Difference in the number of events', y = 'PDF') +
+        theme_bw() 
+plot
+```
+
+## Second hypothesis test results
+Following the hypothesis of the RAE effect, numerous research papers conclude that the effect is more present in more competitive frameworks.
+We have here analyzed the 3-most competitive nations in terms of number of athletes with at least one berth in a word-cup race. The percentage of early borns is higher when considering this elite triplet of nations. Due to the low number of samples though this result cannot be considered statistically significant.
+This results suggest a more in-depth investigation of RAE, with a focus that should also be put to junior competitors. A focus that treats separately some previously selected nations could be beneficial to inspect how differences in the handling of athlete's development affect the presence of the RAE or the lack of it.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

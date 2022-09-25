@@ -1,0 +1,12 @@
+ 
+model {
+for (i in 1:N){
+        Y[i] ~ dbern(p[i])
+        p[i] = ilogit(beta_0 + beta_1*trimester_1[i] + beta_2*trimester_2[i] + beta_3*trimester_3[i])
+    }
+beta_0 ~ dnorm(-13, 1)
+beta_1 ~ dnorm(-13, 1)
+beta_2 ~ dnorm(-13, 1)
+beta_3 ~ dnorm(-13, 1)
+
+}

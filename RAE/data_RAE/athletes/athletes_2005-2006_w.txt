@@ -1,0 +1,165 @@
+No	Family Name	Given Name	Nation	Races	"World CupRank"	"Rank(avg)"	"Points(avg)"	Wins	2nd	3rd	Podiums	Top5s	Top10s	Top20s	Top30s	Top40s	>40	LAP	DNF	DSQ
+1	Wilhelm	Kati	GER	26	1	5.3	38.7	6	9	0	15	18	22	26	26	26	0	0	0	0
+2	Zidek	Anna Carin	SWE	23	2	6.6	35.6	6	2	1	9	12	19	22	23	23	0	0	0	0
+3	Beck	Martina	GER	23	3	9.0	30.2	3	2	0	5	7	16	21	23	23	0	0	0	0
+4	Bailly	Sandrine	FRA	22	4	9.6	29.3	2	4	0	6	10	16	17	22	22	0	0	0	0
+5	Ishmouratova	Svetlana	RUS	19	6	9.4	28.4	2	1	1	4	7	12	17	19	19	0	0	0	0
+6	Grubben	Linda	NOR	18	14	13.4	24.0	2	0	1	3	5	10	15	16	17	1	0	0	0
+7	Zubrilova	Olena	BLR	26	9	16.7	19.0	1	1	1	3	4	7	19	25	25	1	0	0	0
+8	Zaitseva	Olga	RUS	20	15	13.3	20.1	1	1	0	2	4	8	16	18	19	0	0	1	0
+9	Disl	Uschi	GER	24	5	14.5	24.2	1	0	4	5	9	13	17	20	23	1	0	0	0
+10	Baverel	Florence	FRA	23	10	16.1	19.8	1	0	2	3	6	7	15	20	22	1	0	0	0
+11	Poiree	Liv Grete	NOR	18	12	12.0	25.4	1	0	0	1	5	9	16	17	18	0	0	0	0
+12	Akhatova	Albina	RUS	13	17	9.5	29.6	0	1	5	6	8	10	11	12	13	0	0	0	0
+13	Brankovic-Likozar	Tadeja	SLO	22	18	24.7	13.2	0	1	2	3	3	4	10	15	19	3	0	0	0
+14	Henkel	Andrea	GER	23	7	14.7	23.1	0	1	1	2	3	11	19	21	22	1	0	0	0
+15	Ponza	Michela	ITA	24	16	18.9	18.2	0	1	0	1	4	7	16	19	23	1	0	0	0
+16	Medvedtseva	Olga	RUS	12	28	18.8	16.2	0	1	0	1	2	4	7	9	10	1	0	0	1
+17	Bogaliy-Titovets	Anna	RUS	19	23	26.6	12.6	0	1	0	1	1	4	10	12	15	4	0	0	0
+18	Apel	Katrin	GER	24	8	14.6	21.0	0	0	3	3	3	8	21	22	23	1	0	0	0
+19	Vaygina-Efremova	Lilia	UKR	18	26	29.0	11.8	0	0	2	2	3	4	7	11	13	5	0	0	0
+20	Vinogradova	Ekaterina	BLR	25	20	25.5	10.6	0	0	1	1	2	4	10	14	19	4	0	2	0
+21	Nazarova	Olga	BLR	25	13	17.9	17.6	0	0	1	1	1	10	17	21	21	3	0	1	0
+22	Sorokina	Natalia	RUS	22	21	26.5	12.0	0	0	1	1	1	5	8	15	18	4	0	0	0
+23	Hauswald	Simone	GER	22	11	13.7	21.6	0	0	0	0	4	11	18	19	21	0	1	0	0
+24	Hou	Yuxia	CHN	20	25	27.6	11.3	0	0	0	0	1	5	9	12	15	5	0	0	0
+25	Becaert	Sylvie	FRA	22	29	24.2	9.5	0	0	0	0	1	2	8	17	21	1	0	0	0
+26	Sokolova	Natalia	BLR	19	32	26.7	9.4	0	0	0	0	1	2	8	12	16	3	0	0	0
+27	Neuner	Magdalena	GER	10	34	18.1	16.4	0	0	0	0	1	2	7	9	9	1	0	0	0
+28	Gros	Christelle	FRA	21	30	26.3	8.9	0	0	0	0	1	2	5	16	17	4	0	0	0
+29	Filipova	Pavlina	BUL	17	38	31.1	6.5	0	0	0	0	1	2	5	9	11	5	0	1	0
+30	Kocher	Zina	CAN	23	36	34.1	5.5	0	0	0	0	1	1	3	13	16	5	0	2	0
+31	Guzik	Krystyna	POL	18	43	40.2	3.3	0	0	0	0	1	1	1	8	11	7	0	0	0
+32	Liu	Xianying	CHN	18	19	19.1	15.3	0	0	0	0	0	4	11	13	18	0	0	0	0
+33	Dafovska	Ekaterina	BUL	14	27	19.5	12.8	0	0	0	0	0	4	9	11	13	1	0	0	0
+34	Berger	Tora	NOR	20	22	22.4	12.0	0	0	0	0	0	3	12	15	18	2	0	0	0
+35	Gregorin	Teja	SLO	23	24	23.0	11.0	0	0	0	0	0	2	13	18	21	2	0	0	0
+36	Levchenkova	Natalia	MDA	25	33	28.3	7.1	0	0	0	0	0	2	5	16	19	4	0	2	0
+37	Wuestenfeld	Katja	GER	19	31	23.6	10.1	0	0	0	0	0	1	10	13	18	1	0	0	0
+38	Liduma	Madara	LAT	19	37	37.3	6.0	0	0	0	0	0	1	6	10	11	8	0	0	0
+39	Gwizdon	Magdalena	POL	26	35	30.1	5.3	0	0	0	0	0	1	5	15	21	4	0	1	0
+40	Anisimova	Olga	RUS	6	46	29.2	9.3	0	0	0	0	0	1	2	4	5	1	0	0	0
+41	Pavkovcekova	Marcela	SVK	17	51	41.1	2.7	0	0	0	0	0	1	1	4	7	9	1	0	0
+42	Mihokova	Sona	SVK	10	56	50.7	2.7	0	0	0	0	0	1	1	2	3	6	1	0	0
+43	Vejnarova	Zdenka	CZE	20	55	44.5	1.6	0	0	0	0	0	1	1	1	5	15	0	0	0
+44	Nikulchina	Irina	BUL	16	39	30.1	6.8	0	0	0	0	0	0	5	11	12	4	0	0	0
+45	Ravnikar	Dijana	SLO	21	40	36.8	5.0	0	0	0	0	0	0	5	8	13	7	1	0	0
+46	Khvostenko	Oksana	UKR	20	41	32.6	4.0	0	0	0	0	0	0	3	8	14	5	1	0	0
+47	Ekholm	Helena	SWE	11	42	28.3	5.5	0	0	0	0	0	0	3	7	9	2	0	0	0
+48	Andreassen	Gunn Margit	NOR	8	49	29.8	5.6	0	0	0	0	0	0	3	5	7	1	0	0	0
+49	Peretto	Delphine	FRA	16	48	38.1	2.9	0	0	0	0	0	0	2	7	12	4	0	0	0
+50	Sun	Ribo	CHN	14	44	32.9	4.1	0	0	0	0	0	0	2	6	10	4	0	0	0
+51	Malgina	Irina	RUS	12	47	40.3	4.7	0	0	0	0	0	0	2	6	7	5	0	0	0
+52	Halinarova	Martina	SVK	14	50	37.2	3.4	0	0	0	0	0	0	2	4	7	6	1	0	0
+53	Tofalvi	Eva	ROU	13	57	54.7	2.5	0	0	0	0	0	0	2	4	5	8	0	0	0
+54	Petrova	Olena	UKR	12	54	41.7	2.4	0	0	0	0	0	0	2	4	5	6	0	1	0
+55	Kong	Yingchao	CHN	17	45	36.2	3.4	0	0	0	0	0	0	1	8	11	6	0	0	0
+56	Dong	Xue	CHN	16	52	38.1	2.7	0	0	0	0	0	0	1	6	11	5	0	0	0
+57	Mali	Andreja	SLO	15	53	37.8	2.1	0	0	0	0	0	0	1	5	9	4	2	0	0
+58	Flatland	Ann Kristin Aafedt	NOR	14	59	46.0	2.0	0	0	0	0	0	0	1	5	7	7	0	0	0
+59	Eikeland	Liv Kjersti	NOR	11	60	44.4	2.1	0	0	0	0	0	0	1	3	5	6	0	0	0
+60	Rasimoviciute	Diana	LTU	8	63	51.6	1.5	0	0	0	0	0	0	1	2	2	6	0	0	0
+61	Santer	Saskia	ITA	13	68	44.3	0.9	0	0	0	0	0	0	1	1	5	7	1	0	0
+62	Popova	Radka	BUL	13	70	52.3	0.8	0	0	0	0	0	0	1	1	3	9	1	0	0
+63	Rezlerova	Magda	CZE	12	69	52.3	1.0	0	0	0	0	0	0	1	1	3	9	0	0	0
+64	Ananko	Liudmila	BLR	11	67	45.5	1.1	0	0	0	0	0	0	1	1	3	7	0	1	0
+65	Kettunen	Outi	FIN	10	71	54.2	0.8	0	0	0	0	0	0	1	1	1	9	0	0	0
+66	Bonnevie-Svendsen	Julie	NOR	2	64	37.5	5.3	0	0	0	0	0	0	1	1	1	1	0	0	0
+67	Makarainen	Kaisa	FIN	15	62	42.5	1.1	0	0	0	0	0	0	0	5	8	7	0	0	0
+68	Lebedeva	Anna	KAZ	13	58	47.3	2.5	0	0	0	0	0	0	0	4	5	7	1	0	0
+69	Meguro	Kanae	JPN	15	66	49.8	1.1	0	0	0	0	0	0	0	3	4	11	0	0	0
+70	Jacquin	Pauline	FRA	9	61	41.6	2.2	0	0	0	0	0	0	0	3	4	5	0	0	0
+71	Kristiansen	Gro Marit Istad	NOR	8	74	44.5	1.0	0	0	0	0	0	0	0	2	5	3	0	0	0
+72	Holubcova	Katerina	CZE	14	65	46.6	1.1	0	0	0	0	0	0	0	2	4	9	0	1	0
+73	Tananaiko	Irina	UKR	9	77	48.2	0.5	0	0	0	0	0	0	0	2	3	6	0	0	0
+74	Koblar	Andreja	SLO	10	75	46.9	0.8	0	0	0	0	0	0	0	2	3	7	0	0	0
+75	Santer	Nathalie	ITA	17	78	43.4	0.3	0	0	0	0	0	0	0	1	6	11	0	0	0
+76	Yin	Qiao	CHN	14	84	52.1	0.1	0	0	0	0	0	0	0	1	4	9	1	0	0
+77	Zikounkova	Ksenia	BLR	10	72	57.4	0.8	0	0	0	0	0	0	0	1	3	7	0	0	0
+78	Salonen	Eija	FIN	9	81	56.2	0.4	0	0	0	0	0	0	0	1	2	7	0	0	0
+79	Konrad	Sarah	USA	9	86	62.3	0.1	0	0	0	0	0	0	0	1	1	7	1	0	0
+80	Blondeau	Marion	FRA	2	85	38.0	0.5	0	0	0	0	0	0	0	1	1	1	0	0	0
+81	Grzywa	Magdalena	POL	10	83	61.4	0.3	0	0	0	0	0	0	0	1	1	9	0	0	0
+82	Cesnekova	Irena	CZE	10	82	66.2	0.4	0	0	0	0	0	0	0	1	1	9	0	0	0
+83	Domeij	Sofia	SWE	11	80	62.0	0.5	0	0	0	0	0	0	0	1	1	9	1	0	0
+84	Keith	Sandra	CAN	10	79	65.2	0.5	0	0	0	0	0	0	0	1	1	9	0	0	0
+85	Albert	Martine	CAN	8	76	60.8	0.9	0	0	0	0	0	0	0	1	1	7	0	0	0
+86	Sorokina	Anna	RUS	1	73	23.0	8.0	0	0	0	0	0	0	0	1	1	0	0	0	0
+87	Murinova	Anna	SVK	12		47.8	0.0	0	0	0	0	0	0	0	0	5	6	0	1	0
+88	Faltusova	Lenka	CZE	10		53.8	0.0	0	0	0	0	0	0	0	0	4	6	0	0	0
+89	Steer	Rachel	USA	14		50.8	0.0	0	0	0	0	0	0	0	0	4	10	0	0	0
+90	Saue	Eveli	EST	15		57.6	0.0	0	0	0	0	0	0	0	0	3	11	1	0	0
+91	Moerkve	Jori	NOR	6		47.0	0.0	0	0	0	0	0	0	0	0	3	3	0	0	0
+92	Plotogea	Dana	ROU	16		57.9	0.0	0	0	0	0	0	0	0	0	2	13	1	0	0
+93	Tanaka	Tamami	JPN	16		52.9	0.0	0	0	0	0	0	0	0	0	2	14	0	0	0
+94	Kuzmina	Anastasiya	RUS	5		45.4	0.0	0	0	0	0	0	0	0	0	2	3	0	0	0
+95	Ouren	Borghild	NOR	2		39.0	0.0	0	0	0	0	0	0	0	0	2	0	0	0	0
+96	Urpilainen	Pirjo	FIN	2		34.5	0.0	0	0	0	0	0	0	0	0	2	0	0	0	0
+97	Daubnerova	Jana	SVK	5		65.2	0.0	0	0	0	0	0	0	0	0	1	4	0	0	0
+98	Nordstad	Berit	NOR	3		57.0	0.0	0	0	0	0	0	0	0	0	1	2	0	0	0
+99	Slezakova	Petra	SVK	2		57.0	0.0	0	0	0	0	0	0	0	0	1	1	0	0	0
+100	Eie	Kari	NOR	6		57.0	0.0	0	0	0	0	0	0	0	0	1	4	1	0	0
+101	Ertl	Barbara	ITA	4		54.0	0.0	0	0	0	0	0	0	0	0	1	3	0	0	0
+102	Holma	Johanna	SWE	3		48.0	0.0	0	0	0	0	0	0	0	0	1	2	0	0	0
+103	Adler	Jenny	GER	4		44.5	0.0	0	0	0	0	0	0	0	0	1	3	0	0	0
+104	Makarova	Joulia	RUS	2		42.0	0.0	0	0	0	0	0	0	0	0	1	1	0	0	0
+105	Denisova	Uliana	RUS	2		40.5	0.0	0	0	0	0	0	0	0	0	1	1	0	0	0
+106	Cseke	Csaba	HUN	7		108.7	0.0	0	0	0	0	0	0	0	0	0	7	0	0	0
+107	Slettemark	Uiloq	GRL	4		100.8	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+108	Teela	Denise	USA	1		99.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+109	Gottschall	Zsofia	HUN	7		97.4	0.0	0	0	0	0	0	0	0	0	0	7	0	0	0
+110	Vucicevic	Vedrana	BIH	10		96.2	0.0	0	0	0	0	0	0	0	0	0	9	0	1	0
+111	Lagun	Veronika	LTU	6		96.0	0.0	0	0	0	0	0	0	0	0	0	6	0	0	0
+112	Brajdic	Anamarija	CRO	7		94.9	0.0	0	0	0	0	0	0	0	0	0	7	0	0	0
+113	Krause	Jill	USA	2		90.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+114	Hasillova	Zuzana	SVK	1		90.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+115	Stipanicic	Andrijana	CRO	3		89.7	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+116	Gorohova	Elena	MDA	9		89.4	0.0	0	0	0	0	0	0	0	0	0	9	0	0	0
+117	Starcevic	Petra	CRO	8		89.4	0.0	0	0	0	0	0	0	0	0	0	8	0	0	0
+118	Hanni	Sirli	EST	3		89.3	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+119	Fiandino	Roberta	ITA	1		88.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+120	Vasiljevic	Aleksandra	BIH	13		87.3	0.0	0	0	0	0	0	0	0	0	0	12	0	1	0
+121	Walker	Adele	GBR	9		86.9	0.0	0	0	0	0	0	0	0	0	0	9	0	0	0
+122	Mazunina	Tatiana	KAZ	5		86.6	0.0	0	0	0	0	0	0	0	0	0	5	0	0	0
+123	Hietamies	Maija	FIN	4		86.5	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+124	Markkanen	Mervi	FIN	4		83.3	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+125	Purdea	Mihaela	ROU	11		82.5	0.0	0	0	0	0	0	0	0	0	0	11	0	0	0
+126	Peips	Triin	EST	1		82.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+127	Isbej	Veronica	CHI	2		82.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+128	Baric	Tamara	SLO	2		81.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+129	Szocs	Emoke	ROU	1		80.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+130	Treacy Bramante	Carolyn	USA	1		80.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+131	Barnes	Lanny	USA	7		79.9	0.0	0	0	0	0	0	0	0	0	0	7	0	0	0
+132	Mun	Jihee	KOR	2		79.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+133	Krumina	Gerda	LAT	13		79.4	0.0	0	0	0	0	0	0	0	0	0	12	1	0	0
+134	Gasparin	Selina	SUI	2		77.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+135	Moravcova	Klara	CZE	1		77.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+136	Barnes	Tracy	USA	8		76.8	0.0	0	0	0	0	0	0	0	0	0	8	0	0	0
+137	Stoian	Alexandra	ROU	12		76.3	0.0	0	0	0	0	0	0	0	0	0	11	1	0	0
+138	Kim	Seonsu	KOR	2		76.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+139	Savlaka	Linda	LAT	12		75.7	0.0	0	0	0	0	0	0	0	0	0	12	0	0	0
+140	Parent	Marie Pierre	CAN	6		75.5	0.0	0	0	0	0	0	0	0	0	0	6	0	0	0
+141	Fowler	Emma	GBR	15		74.5	0.0	0	0	0	0	0	0	0	0	0	15	0	0	0
+142	Otaka	Tomomi	JPN	9		74.4	0.0	0	0	0	0	0	0	0	0	0	9	0	0	0
+143	Tryznova	Zuzana	CZE	1		73.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+144	Jia	Yuping	CHN	1		72.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+145	Taehe	Tagne	EST	2		71.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+146	Nykiel	Magdalena	POL	7		70.3	0.0	0	0	0	0	0	0	0	0	0	6	1	0	0
+147	Kalinchik	Liudmila	BLR	3		70.0	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+148	Macabies	Pauline	FRA	1		69.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+149	Buchholz	Sabrina	GER	2		67.0	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+150	Mignerey	Anne Laure	FRA	1		67.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+151	Mozhevitina	Inna	KAZ	3		67.0	0.0	0	0	0	0	0	0	0	0	0	3	0	0	0
+152	Klenovska	Nina	BUL	8		66.3	0.0	0	0	0	0	0	0	0	0	0	8	0	0	0
+153	Ponikwia	Katarzyna	POL	12		66.0	0.0	0	0	0	0	0	0	0	0	0	12	0	0	0
+154	Kalinova	Lubomira	SVK	1		66.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+155	Ciaramidaro	Maryke	ITA	2		65.5	0.0	0	0	0	0	0	0	0	0	0	2	0	0	0
+156	Haller	Katja	ITA	7		65.0	0.0	0	0	0	0	0	0	0	0	0	6	0	1	0
+157	Tsukidate	Ikuyo	JPN	13		63.1	0.0	0	0	0	0	0	0	0	0	0	11	2	0	0
+158	Liu	Liming	CHN	1		63.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+159	Brice	Anzela	LAT	5		62.0	0.0	0	0	0	0	0	0	0	0	0	4	1	0	0
+160	Carraz-Collin	Julie	FRA	4		58.8	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+161	Lemesh	Nina	UKR	9		58.7	0.0	0	0	0	0	0	0	0	0	0	9	0	0	0
+162	Frolina	Anna	RUS	1		58.0	0.0	0	0	0	0	0	0	0	0	0	1	0	0	0
+163	Semerenko	Valentina	UKR	4		57.8	0.0	0	0	0	0	0	0	0	0	0	4	0	0	0
+164	Larisi	Lucija	SLO	15		54.5	0.0	0	0	0	0	0	0	0	0	0	13	0	2	0
