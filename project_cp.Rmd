@@ -1,0 +1,2329 @@
+
+```{r}
+library(lubridate)
+library(taRifx)
+library(ggplot2)
+library(purrr)
+library(coda)
+library(rjags)
+```
+
+
+## Data set building
+
+Importing the data for men and women, they are stored in 2 data frames df_results and df_loop. df_results contains the informations of the outcome of each race while df_loop contains all the data of the penultimate loop, that is the loop that brings each biathlete in the last shooting range.
+An ID to identify each race, the location and the year of the data are also added to each data frame.
+
+```{r}
+# Path of the directory for each year for men
+years_men_path <- list.dirs(path = '../biathlon_analysis/biathlon_data/men',
+                            recursive=FALSE,full.names=TRUE)
+
+# Path of the directory for each year for women
+years_women_path <- list.dirs(path='../biathlon_analysis/biathlon_data/women',
+                              recursive=FALSE,full.names=TRUE)
+
+# List of years directory names for men
+years_men <- list.dirs(path = '../biathlon_analysis/biathlon_data/men', 
+                       recursive = FALSE, full.names=FALSE)
+
+# List of years directory names for women
+years_women <- list.dirs(path = '../biathlon_analysis/biathlon_data/women', 
+                         recursive =FALSE,full.names=FALSE)
+
+# Initializing the list of years present in the data set
+years <- c(1:length(years_men))
+
+# Filling the list of years present in the data set
+for (i in c(1:length(years_men))){
+  
+  idx <- unlist(gregexpr('_', years_men[[i]]))
+  string <- unlist(strsplit((years_men[[i]]),""))
+  final_year <- paste(string[1:idx-1], collapse="")
+  years[i] <- final_year
+}
+
+```
+
+
+```{r}
+# Initializing the named list of word cup locations
+locations <- list()
+
+# Filling the list having as names the year and as values the locations of the word cup venues
+for (i in seq_along(years)){
+
+locations[[years[i]]] <- (list.dirs(path = years_men_path[i], recursive = FALSE, full.names = FALSE))
+}
+# Initializing a list that has to be similar to the previous one but with the full path as values
+locations_path_men <- list()
+
+# Same thing for women
+locations_path_women <- list()
+
+# Filling the list
+for (i in seq_along(years)){
+
+  locations_path_men[[years[i]]] <- (list.dirs(path = years_men_path[i], recursive = FALSE, full.names = TRUE))
+}
+
+
+for (i in seq_along(years)){
+
+  locations_path_women[[years[i]]] <- (list.dirs(path = years_women_path[i], recursive = FALSE, full.names = TRUE))
+}
+```
+
+
+
+
+```{r}
+# Defining a custom infix operator to take the role of the not %in% operator
+'%!in%' <- function(a,b) {!( '%in%'(a,b))}
+```
+
+
+
+```{r}
+# Initializing the final data frame of the result of each race
+df_results_men <- data.frame()
+
+# Initializing the id of the race
+race_id <- 0
+
+# Initializing the count of all the DNS
+res_dns_men <- 0
+
+# Initializing the count of all the DSQ
+res_dsq_men <- 0
+
+# Initializing the count of all the DNF
+res_dnf_men <- 0
+
+# Initializing the count of all the lapped athletes
+res_lap_men <- 0
+
+# Initializing the count of all the bibs > 120 because they won't appear in loops, 
+# this happens only in Kontiolahti 2014, these damned Finnish...
+res_over_men <- 0
+
+# The allowable values for the Rank column of the data frame
+allowables <- c(c(1:127), 'DNF', 'DNS', 'DSQ', 'LAP')
+
+# Initializing the list connecting each race to the race_id
+list_id_men <- list()
+
+
+for (i in seq_along(years)){
+  for(j in seq_along(locations[[years[i]]])){
+    files <- list.files(locations_path_men[[years[i]]],
+                  pattern=sprintf('results.%s',locations[[years[i]]][j]),full.names = TRUE )
+    # Importing the data frame
+    for (file in files){
+      
+     
+      race_id <- race_id + 1
+      
+      
+      df_res <- read.csv(file = file, sep = '\t')
+      
+      # Raising a flag if the Rank column has not allowable columns
+      if(length(df_res$Rank[df_res$Rank %!in% allowables]) !=0){cat('wooow problem, in', file)}
+      
+      # Updating the count of bibs > 120
+      res_over_men <- res_over_men + length(df_res$Rank[destring(df_res$Rank) > 120]
+             [! is.na(df_res$Rank[destring(df_res$Rank) > 120])])
+      
+      # Updating the DNS count
+      res_dns_men <- res_dns_men + length(df_res$Rank[df_res$Rank=='DNS'])
+      
+      # Updating the DNF count
+      res_dnf_men <- res_dnf_men + length(df_res$Rank[df_res$Rank=='DNF'])
+      
+      # Updating the DSQ count
+      res_dsq_men <- res_dsq_men + length(df_res$Rank[df_res$Rank=='DSQ'])
+      
+      # Updating the lapped athletes' count
+      res_lap_men <- res_lap_men + length(df_res$Rank[df_res$Rank=='LAP'])
+     
+      
+      # Checking for possible inconsistencies in the data set
+      if('Rank' %!in% colnames(df_res)){
+        cat(paste('There is a mistake in', file))
+      }
+      # Adding the isolated.pursuit column to the non-pursuit races in order to have the same
+      # columns to perform the rbind operation
+      else if('Isolated.Pursuit' %!in% colnames(df_res)){
+        df_res$Isolated.Pursuit <- rep(NA, nrow(df_res))
+      }
+
+      # Adding the column specifying the year of the race
+      df_res$year <- rep(years[i], nrow(df_res))
+      # Adding the column specifying the venue of the race
+      df_res$location <- rep(locations[[years[i]]][j], nrow(df_res))
+      # Adding the column with the id of the race
+      df_res$ID <- rep(race_id, nrow(df_res))
+      
+      # Adding the column specifying the type of the race
+      if (grepl(pattern = 'pursuit', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Pursuit', nrow(df_res))
+      }
+      else if (grepl(pattern = 'individual', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Individual', nrow(df_res))
+      }
+      else if (grepl(pattern = 'mass_start', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Mass start', nrow(df_res))
+      }
+      else if (grepl(pattern = 'sprint', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Sprint', nrow(df_res))
+      }
+      else{
+        cat(paste('There is a mistake in',file,
+                  'no race type specified'))
+      }
+      
+      # Filling the list connecting the id to the race, the unique identifier for a race has
+      # been chosen as a touple, we need also the name of the runner-up because Samuelsson won back
+      # to back spring in Oestersund in 2021... Sebastian, I know you are training with Luki right now 
+      #but you also # could have avoided being so awesome
+      list_id_men[[paste(df_res$race_type[1], years[i], locations[[years[i]]][j], 
+                         df_res$Given.Name[1], df_res$Given.Name[2])]] <- race_id
+      
+      # Updating the final data frame
+      df_results_men <- rbind(df_results_men, df_res)
+    }
+  }
+}
+```
+
+
+
+
+
+
+
+
+```{r}
+# Initializing the final data frame of the result of each race
+df_results_women <- data.frame()
+
+# Initializing the id of the race
+race_id <- 0
+
+# Initializing the count of all the DNS
+res_dns_women <- 0
+
+# Initializing the count of all the DSQ
+res_dsq_women <- 0
+
+# Initializing the count of all the DNF
+res_dnf_women <- 0
+
+# Initializing the count of all the lapped athletes
+res_lap_women <- 0
+
+# Initializing the count of all the bibs > 120 because they won't appear in loops, 
+# this happens only in Kontiolahti 2014, these damned Finnish...
+res_over_women <- 0
+
+# The allowable values for the Rank column of the data frame
+allowables <- c(c(1:127), 'DNF', 'DNS', 'DSQ', 'LAP')
+
+# Defining the list connectiong races to their id
+list_id_women <- list()
+
+for (i in seq_along(years)){
+  for(j in seq_along(locations[[years[i]]])){
+    files <- list.files(locations_path_women[[years[i]]],
+                  pattern=sprintf('results.%s',locations[[years[i]]][j]),full.names = TRUE )
+    # Importing the data frame
+    for (file in files){
+      
+      # Updating the race_id that will act as our primary key of the data set
+      race_id <- race_id + 1
+      
+      list_id_women[[file]] <- race_id
+      
+      df_res <- read.csv(file = file, sep = '\t')
+      
+      # Raising a flag if the Rank column has not allowable columns
+      if(length(df_res$Rank[df_res$Rank %!in% allowables]) !=0){cat('wooow problem, in', file)}
+      
+      # Updating the count of bibs > 120
+      res_over_women <- res_over_women + length(df_res$Rank[destring(df_res$Rank) > 120]
+             [! is.na(df_res$Rank[destring(df_res$Rank) > 120])])
+      
+      # Updating the DNS count
+      res_dns_women <- res_dns_women + length(df_res$Rank[df_res$Rank=='DNS'])
+      
+      # Updating the DNF count
+      res_dnf_women <- res_dnf_women + length(df_res$Rank[df_res$Rank=='DNF'])
+      
+      # Updating the DSQ count
+      res_dsq_women <- res_dsq_women + length(df_res$Rank[df_res$Rank=='DSQ'])
+      
+      # Updating the lapped athletes' count
+      res_lap_women <- res_lap_women + length(df_res$Rank[df_res$Rank=='LAP'])
+     
+      
+      # Checking for possible inconsistencies in the data set
+      if('Rank' %!in% colnames(df_res)){
+        cat(paste('There is a mistake in', file))
+      }
+      # Adding the isolated.pursuit column to the non-pursuit races in order to have the same
+      # columns to perform the rbind operation
+      else if('Isolated.Pursuit' %!in% colnames(df_res)){
+        df_res$Isolated.Pursuit <- rep(NA, nrow(df_res))
+      }
+
+      # Adding the column specifying the year of the race
+      df_res$year <- rep(years[i], nrow(df_res))
+      # Adding the column specifying the venue of the race
+      df_res$location <- rep(locations[[years[i]]][j], nrow(df_res))
+      # Adding the column with the id of the race
+      df_res$ID <- rep(race_id, nrow(df_res))
+      
+      # Adding the column specifying the type of the race
+      if (grepl(pattern = 'pursuit', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Pursuit', nrow(df_res))
+      }
+      else if (grepl(pattern = 'individual', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Individual', nrow(df_res))
+      }
+      else if (grepl(pattern = 'mass_start', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Mass start', nrow(df_res))
+      }
+      else if (grepl(pattern = 'sprint', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Sprint', nrow(df_res))
+      }
+      else{
+        cat(paste('There is a mistake in',file,
+                  'no race type specified'))
+      }
+      
+      # Filling the list as we did for the men, popping out the disqualified is due to the 
+      # Glaryzina affair
+      list_id_women[[paste(df_res$race_type[1], years[i], locations[[years[i]]][j], 
+                         df_res$Given.Name[df_res$Rank %!in% c('DSQ')][1], 
+                         df_res$Given.Name[df_res$Rank %!in% c('DSQ')][2])]] <- race_id
+      
+      # Updating the final data frame
+      df_results_women <- rbind(df_results_women, df_res)
+    }
+  }
+}
+```
+
+
+
+```{r}
+head(df_results_women)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+head(df_results_men)
+```
+
+
+
+
+
+```{r}
+# Initializing the race_id for the second to last loop data frame
+race_id <- 0
+# The set of allowable values for the Rank column of the loop data frame
+allowables <- c(1:127)
+# Initializing the final loop data frame
+df_final_loop_men <- data.frame()
+
+# Beginning the cycle that loops over every year and every venue
+for (i in seq_along(years)){
+  
+  for(j in seq_along(locations[[years[i]]])){
+    
+    
+    # All the files that represent a loop in our directory
+    files <- list.files(locations_path_men[[years[i]]],
+                  pattern=sprintf('loop...%s',locations[[years[i]]][j]),full.names = TRUE )
+    
+      # Looping over all the files
+      for (file in files){
+        # Here we select, between all loop files the ones that represent the second to last loop,
+        # that is, the loop in which the biathlete arrive at the last shooting range
+        if (
+            (grepl(pattern = 'pursuit', x =file, fixed=TRUE)  
+            &&  
+            grepl(pattern = 'loop_4', x =file, fixed=TRUE))
+            || 
+            (grepl(pattern = 'sprint', x =file, fixed=TRUE)  
+             &&  
+            grepl(pattern = 'loop_2', x =file, fixed=TRUE))
+            || 
+            (grepl(pattern = 'individual', x =file, fixed=TRUE)  
+             &&  
+            grepl(pattern = 'loop_4', x =file, fixed=TRUE))
+            || 
+            (grepl(pattern = 'mass_start', x =file, fixed=TRUE)  
+             &&  
+            grepl(pattern = 'loop_4', x =file, fixed=TRUE))
+            
+            ){
+            # Updating the race id
+            
+            
+            # Reading the file into a data frame
+            df_loop <- read.csv2(file = file, sep = '\t')
+            
+            # Here we raise a flag if we don't have the Rank colun in the created data frame
+            if('Rank' %!in% colnames(df_loop)){
+                cat(paste('There is a mistake in', file, '\n'))
+            
+            # Here we raise a flag and print the relative fail if we have a Rank value that is not allowed
+            if(length(df_loop$Rank[df_loop$Rank %!in% allowables]) !=0){cat('wooow problem, in', file)}
+            
+            
+            } 
+            
+            # The column Ski.Time is present only on individual races, for tha others we fill it with 0
+            # in order to make the rbind possible
+            if ('Ski.Time'%!in% colnames(df_loop)){
+              df_loop[['Ski.Time']] <- rep(0, nrow(df_loop))
+            }
+            
+            # The Canmore's short individual did not have the Range.Time column, so we create it for the 
+            # rbind... but who cares about short individuals anyway!!!
+            if ('Range.Time'%!in% colnames(df_loop)){
+              df_loop[['Range.Time']] <- rep(0, nrow(df_loop))
+            }
+            
+            # The columns of the data frame
+            columns_df <- colnames(df_loop)
+            
+            # The index from which column regarding times start
+            idx_time_columns <- which(columns_df=='Nation')
+            
+            # The 'time' columns of the table, the -1 at the end is to delete 'Nation'
+            # that is not between them
+            time_columns <- columns_df[idx_time_columns:length(columns_df)][-1]
+            
+            # Adding the column specifying the year of the race
+            df_loop$year <- rep(years[i], nrow(df_loop))
+            
+            # Adding the column specifying the venue of the race
+            df_loop$location <- rep(locations[[years[i]]][j], nrow(df_loop))
+            
+           
+            
+            # Adding the column specifying the type of the race
+            if (grepl(pattern = 'pursuit', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Pursuit', nrow(df_loop))
+            }
+            else if (grepl(pattern = 'individual', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Individual', nrow(df_loop))
+            }
+            else if (grepl(pattern = 'mass_start', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Mass start', nrow(df_loop))
+            }
+            else if (grepl(pattern = 'sprint', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Sprint', nrow(df_loop))
+            }
+            else{
+              cat(paste('There is a mistake in',file,
+                        'no race type specified'))
+            }
+            
+            # Assigning to the race the same id that it has on the results data frame
+            df_loop$ID <-rep( list_id_men[[paste(df_loop$race_type[1], years[i], locations[[years[i]]][j], 
+                         df_loop$Given.Name[1],  df_loop$Given.Name[2])]], nrow(df_loop))
+            
+            # Initializing the list of the reference times among all the columns, we have in fact that 
+            # time columns are note stored as absolute times: we have a reference time and then the other records
+            # reference to it as +'time_interval'
+            reference_times <- list()
+            
+            # Looping over all the time columns
+            for(column in time_columns){
+              
+              # In individual races penalty times, as we know, are a thing of their own and the data set
+              # itself seem to have noticed! It does not have in fact a value for biathletes that found the
+              # 0 in a certain shooting range. We deal with it by giving by default the value 0.
+              # We know what you are thinking: What if every one missed at least once?
+              # Come on have a little trust in your sport heroes! as soon as Sturla Holm Lægreid will be around
+              # we are more them safe!
+              if (column == 'Penalty.Time'
+                  &&
+                  grepl(pattern = 'individual', x = file, fixed=TRUE)
+                  )
+              {reference_time <- duration(second = 0)}
+              
+              # In the else statement instead we select as the reference time the record with no '+' in 
+              # its body, the [1] is there to arbitrary break the ties between equally good reference times
+              else{
+                reference_time <- df_loop[[column]][!grepl(pattern = '+', x =df_loop[[column]],
+                            fixed=TRUE)]
+                }
+              reference_time <- reference_time[1]
+              
+              # In this if cycle we convert the reference time from a string to a time duration
+              # thanks to the lubridate package and its duration function
+              
+              # The first case is for whe we have minutes and not only second where we have a column 
+              # as a separator
+              if (grepl(pattern = ':', x  = reference_time,
+                            fixed=TRUE)){
+                
+                # Changing the reference time into an iterable
+                string_sep <- unlist(strsplit((reference_time),""))
+                
+                # Getting the index of the column
+                idx_sep <- unlist(gregexpr(':', reference_time, fixed = TRUE))
+                
+                # This step raises a flag if having a double colon signaling hours, 
+                # comes out: biathletes are no snails!
+                if (length(idx_sep) > 1){cat(paste('Do we have hours now?? in', file  ))}
+                
+                # The minute part of the reference time
+                min <- as.numeric(paste(string_sep[1:idx_sep-1], collapse=""))
+                
+                # The second part of the reference time
+                sec <- as.numeric(paste(string_sep[-c(1:idx_sep)], collapse=""))
+                reference_time_ <- duration(minute= min, second=sec)
+                
+              }
+              # This second case is for reference times that don't reach a minute
+              else{
+                sec <- as.numeric(reference_time)
+                reference_time_ <- duration(second=sec)
+              }
+              
+              # Updating the list
+              reference_times[[column]] <- reference_time_
+              
+              # Index of the reference times
+              reference_time_idx <- which(!grepl(pattern = '+', x =df_loop[[column]],
+                            fixed=TRUE))
+              
+              # Renaming the times of the current columns
+              times_to_add <- df_loop[[column]]
+              
+              # Initializing the column of the absolute times
+              final_adding <- c()
+              
+              # Filling the final_adding vector
+              for (k in seq_along(times_to_add)){
+                
+                # Putting in the reference times
+                if (k %in% reference_time_idx){
+                  final_adding[k] <- reference_times[[column]]
+                }
+                
+                # Putting in the 'minutes' recorda
+                else if (grepl(pattern = ':', x =times_to_add[k], fixed=TRUE)){
+                  string_add <- unlist(strsplit((times_to_add[k]),""))
+                  idx_add <- unlist(gregexpr(':', times_to_add[k]))
+                  
+                  # Flag raise for 'hour' times
+                  if (length(idx_add) > 1){print('Do we have hours now?? in', file)} 
+                  
+                  min_add <- as.numeric(paste(string_add[1:idx_add-1], collapse=""))
+                  sec_add <- as.numeric(paste(string_add[-c(1:idx_add)], collapse=""))
+                  
+                  adding_time <- duration(minute= min_add, second=sec_add)
+                  
+                  # Here the [1] is present for arbitrarily breaking ties for equally good
+                  # reference times
+                  final_adding[k] <- adding_time + reference_times[[column]][1]
+                }
+                else{
+                  
+                  # The original data frame contained a couple of 'broken' records, being only
+                  # the string '+', we changed the values to a known fixed outlier ('+1000') and here
+                  # we transform it into NA
+                  if (times_to_add[k]=='+1000') {final_adding[k] <- NA}
+                  
+                  # Non pathological case were we have a 'seconds' time
+                  else{
+                    final_adding[k] <- duration(second = as.numeric(times_to_add[k])) + 
+                      reference_times[[column]]
+                  }
+                }
+                 
+              }
+              
+              # Updating the column of the data frame
+              df_loop[[column]] <- final_adding
+             
+              
+            }
+            
+          # Binding together the data frames  
+          df_final_loop_men <- rbind(df_final_loop_men, df_loop)
+        
+      }
+    }
+  }
+}
+
+
+```
+
+
+```{r}
+head(df_final_loop_men)
+```
+
+
+
+```{r}
+# Initializing the race_id for the second to last loop data frame
+race_id <- 0
+# The set of allowable values for the Rank column of the loop data frame
+allowables <- c(1:127)
+# Initializing the final loop data frame
+df_final_loop_women <- data.frame()
+
+# Beginning the cycle that loops over every year and every venue
+for (i in seq_along(years)){
+  
+  for(j in seq_along(locations[[years[i]]])){
+    
+    
+    # All the files that represent a loop in our directory
+    files <- list.files(locations_path_women[[years[i]]],
+                  pattern=sprintf('loop...%s',locations[[years[i]]][j]),full.names = TRUE )
+    
+      # Looping over all the files
+      for (file in files){
+        # Here we select, between all loop files the ones that represent the second to last loop,
+        # that is, the loop in which the biathlete arrive at the last shooting range
+        if (
+            (grepl(pattern = 'pursuit', x =file, fixed=TRUE)  
+            &&  
+            grepl(pattern = 'loop_4', x =file, fixed=TRUE))
+            || 
+            (grepl(pattern = 'sprint', x =file, fixed=TRUE)  
+             &&  
+            grepl(pattern = 'loop_2', x =file, fixed=TRUE))
+            || 
+            (grepl(pattern = 'individual', x =file, fixed=TRUE)  
+             &&  
+            grepl(pattern = 'loop_4', x =file, fixed=TRUE))
+            || 
+            (grepl(pattern = 'mass_start', x =file, fixed=TRUE)  
+             &&  
+            grepl(pattern = 'loop_4', x =file, fixed=TRUE))
+            
+            ){
+            # Updating the race id
+            race_id <- race_id + 1
+            
+            # Reading the file into a data frame
+            df_loop <- read.csv2(file = file, sep = '\t')
+            
+            # Here we raise a flag if we don't have the Rank colun in the created data frame
+            if('Rank' %!in% colnames(df_loop)){
+                cat(paste('There is a mistake in', file, '\n'))
+            
+            # Here we raise a flag and print the relative fail if we have a Rank value that is not allowed
+            if(length(df_loop$Rank[df_loop$Rank %!in% allowables]) !=0){cat('wooow problem, in', file)}
+            
+            
+            } 
+            
+            # The column Ski.Time is present only on individual races, for tha others we fill it with 0
+            # in order to make the rbind possible
+            if ('Ski.Time'%!in% colnames(df_loop)){
+              df_loop[['Ski.Time']] <- rep(0, nrow(df_loop))
+            }
+            
+            # The Canmore's short individual did not have the Range.Time column, so we create it for the 
+            # rbind... but who cares about short individuals anyway!!!
+            if ('Range.Time'%!in% colnames(df_loop)){
+              df_loop[['Range.Time']] <- rep(0, nrow(df_loop))
+            }
+            
+            # The columns of the data frame
+            columns_df <- colnames(df_loop)
+            
+            # The index from which column regarding times start
+            idx_time_columns <- which(columns_df=='Nation')
+            
+            # The 'time' columns of the table, the -1 at the end is to delete 'Nation'
+            # that is not between them
+            time_columns <- columns_df[idx_time_columns:length(columns_df)][-1]
+            
+            # Adding the column specifying the year of the race
+            df_loop$year <- rep(years[i], nrow(df_loop))
+            
+            # Adding the column specifying the venue of the race
+            df_loop$location <- rep(locations[[years[i]]][j], nrow(df_loop))
+            
+           
+            
+            # Adding the column specifying the type of the race
+            if (grepl(pattern = 'pursuit', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Pursuit', nrow(df_loop))
+            }
+            else if (grepl(pattern = 'individual', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Individual', nrow(df_loop))
+            }
+            else if (grepl(pattern = 'mass_start', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Mass start', nrow(df_loop))
+            }
+            else if (grepl(pattern = 'sprint', x =file, fixed=TRUE)){
+              df_loop$race_type <- rep('Sprint', nrow(df_loop))
+            }
+            else{
+              cat(paste('There is a mistake in',file,
+                        'no race type specified'))
+            }
+            
+             # Adding the column with the id of the race
+            
+            # Assigning to the race the same id that it has on the results data frame
+            df_loop$ID <-rep( list_id_women[[paste(df_loop$race_type[1], years[i], locations[[years[i]]][j], 
+                         df_loop$Given.Name[df_res$Rank %!in% c('DSQ')][1],  
+                         df_loop$Given.Name[df_res$Rank %!in% c('DSQ')][2])]], nrow(df_loop))
+            
+            # Initializing the list of the reference times among all the columns, we have in fact that 
+            # time columns are note stored as absolute times: we have a reference time and then the other records
+            # reference to it as +'time_interval'
+            reference_times <- list()
+            
+            # Looping over all the time columns
+            for(column in time_columns){
+              
+              # In individual races penalty times, as we know, are a thing of their own and the data set
+              # itself seem to have noticed! It does not have in fact a value for biathletes that found the
+              # 0 in a certain shooting range. We deal with it by giving by default the value 0.
+              # We know what you are thinking: What if every one missed at least once?
+              # Come on have a little trust in your sport heroes! as soon as Sturla Holm Lægreid will be around
+              # we are more them safe!
+              if (column == 'Penalty.Time'
+                  &&
+                  grepl(pattern = 'individual', x = file, fixed=TRUE)
+                  )
+              {reference_time <- duration(second = 0)}
+              
+              # In the else statement instead we select as the reference time the record with no '+' in 
+              # its body, the [1] is there to arbitrary break the ties between equally good reference times
+              else{
+                reference_time <- df_loop[[column]][!grepl(pattern = '+', x =df_loop[[column]],
+                            fixed=TRUE)]
+                }
+              reference_time <- reference_time[1]
+              
+              # In this if cycle we convert the reference time from a string to a time duration
+              # thanks to the lubridate package and its duration function
+              
+              # The first case is for whe we have minutes and not only second where we have a column 
+              # as a separator
+              if (grepl(pattern = ':', x  = reference_time,
+                            fixed=TRUE)){
+                
+                # Changing the reference time into an iterable
+                string_sep <- unlist(strsplit((reference_time),""))
+                
+                # Getting the index of the column
+                idx_sep <- unlist(gregexpr(':', reference_time, fixed = TRUE))
+                
+                # This step raises a flag if having a double colon signaling hours, 
+                # comes out: biathletes are no snails!
+                if (length(idx_sep) > 1){cat(paste('Do we have hours now?? in', file  ))}
+                
+                # The minute part of the reference time
+                min <- as.numeric(paste(string_sep[1:idx_sep-1], collapse=""))
+                
+                # The second part of the reference time
+                sec <- as.numeric(paste(string_sep[-c(1:idx_sep)], collapse=""))
+                reference_time_ <- duration(minute= min, second=sec)
+                
+              }
+              # This second case is for reference times that don't reach a minute
+              else{
+                sec <- as.numeric(reference_time)
+                reference_time_ <- duration(second=sec)
+              }
+              
+              # Updating the list
+              reference_times[[column]] <- reference_time_
+              
+              # Index of the reference times
+              reference_time_idx <- which(!grepl(pattern = '+', x =df_loop[[column]],
+                            fixed=TRUE))
+              
+              # Renaming the times of the current columns
+              times_to_add <- df_loop[[column]]
+              
+              # Initializing the column of the absolute times
+              final_adding <- c()
+              
+              # Filling the final_adding vector
+              for (k in seq_along(times_to_add)){
+                
+                # Putting in the reference times
+                if (k %in% reference_time_idx){
+                  final_adding[k] <- reference_times[[column]]
+                }
+                
+                # Putting in the 'minutes' recorda
+                else if (grepl(pattern = ':', x =times_to_add[k], fixed=TRUE)){
+                  string_add <- unlist(strsplit((times_to_add[k]),""))
+                  idx_add <- unlist(gregexpr(':', times_to_add[k]))
+                  
+                  # Flag raise for 'hour' times
+                  if (length(idx_add) > 1){print('Do we have hours now?? in', file)} 
+                  
+                  min_add <- as.numeric(paste(string_add[1:idx_add-1], collapse=""))
+                  sec_add <- as.numeric(paste(string_add[-c(1:idx_add)], collapse=""))
+                  
+                  adding_time <- duration(minute= min_add, second=sec_add)
+                  
+                  # Here the [1] is present for arbitrarily breaking ties for equally good
+                  # reference times
+                  final_adding[k] <- adding_time + reference_times[[column]][1]
+                }
+                else{
+                  
+                  # The original data frame contained a couple of 'broken' records, being only
+                  # the string '+', we changed the values to a known fixed outlier ('+1000') and here
+                  # we transform it into NA
+                  if (times_to_add[k]=='+1000') {final_adding[k] <- NA}
+                  
+                  # Non pathological case were we have a 'seconds' time
+                  else{
+                    final_adding[k] <- duration(second = as.numeric(times_to_add[k])) + 
+                      reference_times[[column]]
+                  }
+                }
+                 
+              }
+              
+              # Updating the column of the data frame
+              df_loop[[column]] <- final_adding
+             
+              
+            }
+            
+          # Binding together the data frames  
+          df_final_loop_women <- rbind(df_final_loop_women, df_loop)
+        
+      }
+    }
+  }
+}
+
+```
+
+
+
+```{r}
+head(df_final_loop_women)
+```
+
+
+
+
+
+
+
+```{r}
+head(df_final_loop_men)
+```
+In this part we check the consistency of our import, verifying that df_results and df_loop have the same rows,
+in the loop data frame data accounting for DNF, DNS, DSQ, LAP and for the Bibs greater than 120 are not present.
+
+```{r}
+if(res_dnf_men + res_dns_men + res_dsq_men + res_lap_men + res_over_men + nrow(df_final_loop_men) == nrow(df_results_men)){
+  cat('Thank god we no one got lost')
+  }else{'Who is missing?!'}
+```
+
+```{r}
+
+if(res_dnf_women + res_dns_women + res_dsq_women + res_lap_women + res_over_women + nrow(df_final_loop_women) == nrow(df_results_women)){
+  cat('Thank god we no one got lost')
+  }else{'Who is missing?!'}
+```
+
+
+
+## Finding the clutchest biathletes in the word cup
+
+Here we wanna work in analogy to what happens in the computation of the efficiency of a vaccine, in that framework some patients are shot with placebo and some other with the real vaccine. Based on how many patients develop the illness, the efficiency is computed as $$\frac{placebo - vaccine}{placebo} \cdot 100$$.
+Neither the patient nor the doctor knows the nature of the shot
+The analogy here is that we separate instances where the biathlete enters the last shooting range in the top 10 (considered as vaccine's shot) and instances where they are further behind (considered as placebo). Here the ones that have no information on the state of the athlete are the targets that close or remain open independently from the current position of the racer.
+So while for the vaccine an high efficiency is a positive thing, in this case an higher efficiency means that you are influenced in a bad way by finding yourself in a meaningful position.
+Differently from the medical case were we controlled whether the patient developed or not the illness here we look at the number of hits in the last shooting range.
+
+
+
+```{r}
+# Performing the left join between the 2 men data frames
+df_clutch_men <- merge(x=df_results_men,y=df_final_loop_men, by=c('ID', 
+                                                                  'location', 'Nation', 'Rank', 'Bib',
+                                                                  'Family.Name', 'Given.Name',
+                                                                  'year', 'race_type'), all.x=FALSE,
+                                                                  all.y=TRUE, sort=FALSE)
+```
+
+```{r}
+head(df_clutch_men)
+```
+```{r}
+# Performing the two left join for the 2 women data frames
+df_clutch_women <- merge(x=df_results_women,y=df_final_loop_women, by=c('ID', 
+                                                                  'location', 'Nation', 'Rank', 'Bib',
+                                                                  'Family.Name', 'Given.Name',
+                                                                  'year', 'race_type'), all.x=FALSE,
+                                                                  all.y=TRUE, sort=FALSE)
+```
+
+
+
+```{r}
+head(df_clutch_women)
+```
+
+```{r}
+# Defining the function to create a column with the number of mistakes in the final range
+final_range <- function(x){
+  iterable <- unlist(strsplit((x),""))
+  return(iterable[length(iterable)])
+}
+
+# Creating the 2 columns
+df_clutch_men$final_range <- as.numeric(sapply(df_clutch_men$Shootings, final_range))
+df_clutch_women$final_range <- as.numeric(sapply(df_clutch_women$Shootings, final_range))
+```
+
+
+For this part of the analysis we consider only head-to-head races, that is, pursuits and mass starts.
+We in fact want to test how the athlete is influenced by the head to head comparison with opponents when the stakes are high. In this case the presence of another competitor might be cause for an increase of the misses due to higher pressure and the influence of the other athlete shooting besides you.
+
+
+```{r}
+#Defining the data frame with only pursuits and mass starts
+df_no_chrono_men <- df_clutch_men[df_clutch_men$race_type %!in% c('Sprint', 'Individual'),]
+
+df_no_chrono_women <- df_clutch_women[df_clutch_women$race_type %!in% c('Sprint', 'Individual'),]
+
+# The unique ids of the races
+unique_ids <- unique(df_no_chrono_men$ID)
+
+unique_ids_w <- unique(df_no_chrono_women$ID)
+
+# Initializing the data frame with athletes entering the last shooting range in the top ten
+df_top10_men <- data.frame()
+
+df_top10_women <- data.frame()
+
+# Initializing the data frame with athletes entering the last shooting range outside the top ten
+df_bottom <- data.frame()
+df_bottom_w <- data.frame()
+
+#Looping over the ids
+for (id in unique_ids){
+  # Identifying the race with each id
+  race <- df_no_chrono_men[df_no_chrono_men$ID == id,]
+  # Computing the time entering the shooting range
+  race$entry_time <- race$Cumulative.Time - race$Range.Time - 
+                    race$Penalty.Time
+  # We order the race following the entry time record
+  race_ord <- race[order(race$entry_time),]
+  # Taking only the top 10 rows
+  race_add <- race_ord[c(1:10), ]
+  # Taking all the records but thew top 10
+  race_add_last <- race_ord[c(11:nrow(race_ord)), ]
+  # Updating the df_bottom data frame
+  df_bottom <- rbind(df_bottom, race_add_last)
+  # Updating the f_top10 data frame
+  df_top10_men <- rbind(df_top10_men, race_add)
+}
+
+
+#Looping over the ids
+for (id in unique_ids_w){
+  # Identifying the race with each id
+  race_w <- df_no_chrono_women[df_no_chrono_women$ID == id,]
+  # Computing the time entering the shooting range
+  race_w$entry_time <- race_w$Cumulative.Time - race_w$Range.Time - 
+                    race_w$Penalty.Time
+  # We order the race following the entry time record
+  race_ord_w <- race_w[order(race_w$entry_time),]
+  # Taking only the top 10 rows
+  race_add_w <- race_ord_w[c(1:10), ]
+  # Taking all the records but thew top 10
+  race_add_last_w <- race_ord_w[c(11:nrow(race_ord_w)), ]
+  # Updating the df_bottom data frame
+  df_bottom_w <- rbind(df_bottom_w, race_add_last_w)
+  # Updating the f_top10 data frame
+  df_top10_women <- rbind(df_top10_women, race_add_w)
+}
+```
+
+
+In the data frame after converting the times into absolute times we made an ordering based on the time arrival of the athletes at the last range: we subtracted from the cumulative time at the end of the penultimate loop the range time of the last shooting and the relative penalty time.
+We then sorted the outcome and marked the first 10 rows as in-top-10 arrivals, while the other are signaled as out-of-top-10 entries.
+
+
+```{r}
+head(df_top10_men)
+```
+
+
+```{r}
+head(df_top10_women)
+```
+
+```{r}
+head(df_bottom)
+```
+
+
+
+```{r}
+head(df_bottom_w)
+```
+
+
+
+
+```{r}
+# Creating the column with the full name of the record
+df_bottom$full_name <- paste(df_bottom$Family.Name, df_bottom$Given.Name, '')
+df_bottom_w$full_name <- paste(df_bottom_w$Family.Name, df_bottom_w$Given.Name, '')
+
+# Solving the Alexander Loginov problem
+df_bottom$full_name[df_bottom$full_name == 'Loginov Alexandr '] <- 'Loginov Alexander '
+# Creating the column with the full name of the record
+df_top10_men$full_name <- paste(df_top10_men$Family.Name, df_top10_men$Given.Name, '')
+df_top10_women$full_name <- paste(df_top10_women$Family.Name, df_top10_women$Given.Name, '')
+# Solving the Alexander Loginov problem
+df_top10_men$full_name[df_top10_men$full_name == 'Loginov Alexandr '] <- 'Loginov Alexander '
+
+# Defining the vector of biathletes that have more than 5 top ten appearances
+top_names <- names(table(df_top10_men$full_name)[unname(table(df_top10_men$full_name))>=5])
+top_names_w <- names(table(df_top10_women$full_name)[unname(table(df_top10_women$full_name))>=5])
+# Selecting only the top names
+top_names_top_10_w <- df_top10_women[df_top10_women$full_name %in% top_names_w,]
+top_names_top_10 <- df_top10_men[df_top10_men$full_name %in% top_names,]
+head(top_names_top_10)
+head(top_names_top_10_w)
+```
+
+
+
+
+```{r}
+# Selecting only the athletes in top_names
+top_names_bottom <- df_bottom[df_bottom$full_name %in% top_names,]
+top_names_bottom_w <- df_bottom_w[df_bottom_w$full_name %in% top_names_w,]
+head(top_names_bottom)
+head(top_names_bottom_w)
+```
+
+Now we want to visualize the most consistent athletes, we plot the percentage of times the top biathletes entered the final shooting range in a top ten position.
+
+```{r}
+# The percentage of times each athlete entered the last shooting range in the top 10
+# per each athlete
+named_percentages <- table(top_names_top_10$full_name)/(table(top_names_top_10$full_name) 
+                                   + table(top_names_bottom$full_name))*100
+
+named_percentages_w <- table(top_names_top_10_w$full_name)/(table(top_names_top_10_w$full_name) 
+                                   + table(top_names_bottom_w$full_name))*100
+
+# The actual percentages
+percentages <- unname(named_percentages)
+percentages_w <- unname(named_percentages_w)
+# The vector to order the percentages
+order_perc_w <- order(percentages_w)
+order_perc <- order(percentages)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+plot <- ggplot() +
+        geom_col(aes(x=names(named_percentages) , y=sort(unname(percentages)))) +
+        
+        scale_x_discrete(labels = names(named_percentages)[order_perc]) +
+        
+        theme_bw() +
+        theme(axis.text.x = element_text(angle = 90, hjust=1, vjust=0.5)) +
+        geom_col(aes(x=31 , y=unname(named_percentages[names(named_percentages)=='Hofer Lukas ']))
+                 , fill='blue', color='black') +
+        geom_col(aes(x=5 , y=unname(named_percentages[names(named_percentages)=='Windisch Dominik ']))
+                 , fill='blue', color='black') +
+        geom_col(aes(x=50 , y=unname(named_percentages[names(named_percentages)=='Fourcade Martin ']))
+                 , fill='firebrick', color='black') +
+        labs(x = '', y = '% of times entering in the top 10', title = 'Concistency of the top biathletes')
+plot
+
+```
+We see with no surprise how the most consistent biathlete is Martin Fourcade (highlighted in red), not anyone gets the name Monsieur Le Biathlon after all. It comes with quite the surprise though the massive advantage he has with respect to another great as Johannes Thingnes Bø, a whopping 88.7% against 75%. We have to consider though that our data starts from the 2014/2015 season so when Fourcade was already in its prime while Johannes was moving his big but first steps in the word cup. 
+In blue we can see the two Italians represented, as we know Luki is by far the most consistent but the infamous echoes of a certain word championship still rings in our ears... CINQUE!
+
+p.s. that Oestersund mass start isn't represented in this part of the analysis as Dominik entered the last shooting range outside the top 10... we all know the ending though.
+
+
+```{r}
+plot <- ggplot() +
+        geom_col(aes(x=names(named_percentages_w) , y=sort(unname(percentages_w)))) +
+        
+        scale_x_discrete(labels = names(named_percentages_w)[order_perc_w]) +
+        
+        theme_bw() +
+        theme(axis.text.x = element_text(angle = 90, hjust=+1, vjust = 0.5)) +
+        geom_col(aes(x=46 , y=unname(named_percentages_w[names(named_percentages_w)=='Wierer Dorothea ']))
+                 , fill='blue', color='black') +
+        geom_col(aes(x=17 , y=unname(named_percentages_w[names(named_percentages_w)=='Vittozzi Lisa ']))
+                 , fill='blue', color='black') +
+        geom_col(aes(x=49 , y=unname(named_percentages_w[names(named_percentages_w)=='Domracheva Darya ']))
+                 , fill='firebrick', color='black') +
+        labs(x = '', y = '% of times entering in the top 10', title = 'Concistency of the top biathletes')
+plot
+
+```
+In the women's case Domracheva, Dahlmeier and Koukalova are in a class of their own, we can notice how there isn't a big drop in the percentage of times entering the last range in the top 10 from Domracheva to Dahlmeier contrary to what happened in the men's case.
+Speaking of our heroines, Dorothea is top notch while Lisa struggle a little bit more, we have to consider though that the Sappada native was moving her first steps in the word cup at the beginning of the data acquisition.
+
+We can notice how there is a big drop in consistency from the leading 3 women to Dorothea Wierer and another tier can be identified in the passage fro Kristina Reztsova (whose carrier is still young) and Denise Herrmann.
+
+
+
+
+
+```{r}
+# The data frame that will contain data representing the efficiency
+efficiency_df <- data.frame(table(top_names_bottom$full_name), table(top_names_top_10$full_name))
+efficiency_df_w <- data.frame(table(top_names_bottom_w$full_name), table(top_names_top_10_w$full_name))
+# Eliminating the duplicate of the names
+efficiency_df$Var1.1 <- NULL
+efficiency_df_w$Var1.1 <- NULL
+# Re-defining the column names
+colnames(efficiency_df) <- c('Full Names', '# Out top 10', '# In top 10')
+colnames(efficiency_df_w) <- c('Full Names', '# Out top 10', '# In top 10')
+head(efficiency_df)
+head(efficiency_df_w)
+```
+
+```{r}
+# Getting the misses in the top 10
+miss_top_10 <- aggregate(x = top_names_top_10$final_range, by=list(Names = top_names_top_10$full_name), 
+                         FUN = sum)
+
+miss_top_10_w <- aggregate(x = top_names_top_10_w$final_range, by=list(Names = top_names_top_10_w$full_name), 
+                         FUN = sum)
+head(miss_top_10)
+head(miss_top_10_w)
+```
+
+
+```{r}
+# Misses when approaching not in the top ten
+miss_no_top_10 <- aggregate(x = top_names_bottom$final_range, by=list(Names = top_names_bottom$full_name), 
+                         FUN = sum)
+head(miss_no_top_10)
+
+miss_no_top_10_w<- aggregate(x = top_names_bottom_w$final_range, by=list(Names = top_names_bottom_w$full_name), 
+                         FUN = sum)
+head(miss_no_top_10_w)
+```
+
+
+
+
+```{r}
+# Updating the efficiency df with Misses and attempts
+efficiency_df <- cbind(efficiency_df, 'Misses top 10' = miss_top_10$x, 
+      'Attempts top 10' = efficiency_df$`# In top 10`*5,
+      'Misses not top 10' = miss_no_top_10$x,
+      'Attempts no top 10' = efficiency_df$`# Out top 10`*5)
+
+efficiency_df_w <- cbind(efficiency_df_w, 'Misses top 10' = miss_top_10_w$x, 
+      'Attempts top 10' = efficiency_df_w$`# In top 10`*5,
+      'Misses not top 10' = miss_no_top_10_w$x,
+      'Attempts no top 10' = efficiency_df_w$`# Out top 10`*5)
+```
+
+
+
+```{r}
+head(efficiency_df)
+head(efficiency_df_w)
+```
+
+Now we wanna determine a proper prior, due to its conjugate properties we choose a beta prior that is appropriate also because it is defines between 0 and 1 exactly as a probability. We use a beta having as mode, for each biathlete, the probability of hitting a shot taking into account all the pursuit and mass start competitions; as standard deviation, the std of the same probability.
+We should be careful though, the last shooting range is always a standing shooting range so, as far as the prior is concerned, we take the hits and misses only from the last two ranges.
+We limited our choice on the standing shooting because often standing and prone shooting are considered two different sports and thus should be keep separated.
+
+
+
+
+```{r}
+# Adding the full name to the no_chrono data frame
+df_no_chrono_men$full_name <- paste(df_no_chrono_men$Family.Name, df_no_chrono_men$Given.Name, '')
+
+df_no_chrono_women$full_name <- paste(df_no_chrono_women$Family.Name, df_no_chrono_women$Given.Name, '')
+
+# Function to compute the mistakes in the standing shootings
+last_shots <- function(x){
+  #Making our string an iterable
+  iterable <- unlist(strsplit((x),""))
+  #Taking the shots of interest
+  string_shots <- iterable[c(5, 7)]
+  #Converting the first shot
+  first_shot <- as.numeric(string_shots[1])
+  # Converting the second shot
+  second_shot <- as.numeric(string_shots[2])
+  # Returning the total mistakes
+  return(first_shot + second_shot)
+}
+
+# Making the column with the total misses 
+df_no_chrono_men$miss_last_2 <- sapply(X = df_no_chrono_men$Shootings, FUN = last_shots)
+df_no_chrono_women$miss_last_2 <- sapply(X = df_no_chrono_women$Shootings, FUN = last_shots)
+
+# Making the column with the standing precision
+df_no_chrono_men$standing_prob <- (10-df_no_chrono_men$miss_last_2)/10
+df_no_chrono_women$standing_prob <- (10-df_no_chrono_women$miss_last_2)/10
+```
+
+
+
+```{r}
+head(df_no_chrono_men)
+head(df_no_chrono_women)
+```
+
+
+
+
+
+```{r}
+# Total misses for each biathlete over the full data frame
+misses <- aggregate(x = df_no_chrono_men$miss_last_2, by = list(Names = df_no_chrono_men$full_name),
+                    FUN = sum)$x
+
+# Data frame with the number of occurrences
+occ <- as.data.frame(table(df_no_chrono_men$full_name))
+
+# Creating the joint data frame
+hit_miss <- cbind(occ, misses)
+
+# Each occurences corresponds to 10 shots
+hit_miss$Freq <- hit_miss$Freq*10
+
+# Renaming the shots
+colnames(hit_miss) <- c('Names', 'Tot_Attempts', 'Misses')
+
+# Inserting the total attempts
+hit_miss$Hits <- hit_miss$Tot_Attempts - hit_miss$Misses
+
+# Inserting the mean probability for each biathlete
+hit_miss$Probabilities <- hit_miss$Hits/hit_miss$Tot_Attempts
+
+# Restricting to the atlethes inside the top_names vector
+top_names_hit_miss <- hit_miss[hit_miss$Names %in% top_names,]
+
+head(top_names_hit_miss)
+
+# Total misses for each biathlete over the full data frame
+misses_w <- aggregate(x = df_no_chrono_women$miss_last_2, by = list(Names = df_no_chrono_women$full_name),
+                    FUN = sum)$x
+
+# Data frame with the number of occurrences
+occ_w <- as.data.frame(table(df_no_chrono_women$full_name))
+
+# Creating the joint data frame
+hit_miss_w <- cbind(occ_w, misses_w)
+
+# Each occurences corresponds to 10 shots
+hit_miss_w$Freq <- hit_miss_w$Freq*10
+
+# Renaming the shots
+colnames(hit_miss_w) <- c('Names', 'Tot_Attempts', 'Misses')
+
+# Inserting the total attempts
+hit_miss_w$Hits <- hit_miss_w$Tot_Attempts - hit_miss_w$Misses
+
+# Inserting the mean probability for each biathlete
+hit_miss_w$Probabilities <- hit_miss_w$Hits/hit_miss_w$Tot_Attempts
+
+# Restricting to the atlethes inside the top_names vector
+top_names_hit_miss_w <- hit_miss_w[hit_miss_w$Names %in% top_names_w,]
+
+head(top_names_hit_miss_w)
+```
+
+
+```{r}
+# Computing the standard deviation of the probabilities
+std <- aggregate(x = df_no_chrono_men$standing_prob, 
+          by = list(Category = df_no_chrono_men$full_name), FUN = sd)
+
+# Restricting to top_names
+top_names_std <- std[std$Category %in% top_names,]
+
+# Updating the top_names_hit_miss data frame
+top_names_hit_miss$std <- top_names_std$x
+
+head(top_names_hit_miss)
+
+
+# Computing the standard deviation of the probabilities
+std_w <- aggregate(x = df_no_chrono_women$standing_prob, 
+          by = list(Category = df_no_chrono_women$full_name), FUN = sd)
+
+# Restricting to top_names
+top_names_std_w <- std_w[std_w$Category %in% top_names_w,]
+
+# Updating the top_names_hit_miss data frame
+top_names_hit_miss_w$std <- top_names_std_w$x
+
+head(top_names_hit_miss_w)
+```
+
+
+```{r}
+# The function to compute the alpha of the beta given mean and variance
+alpha <- function(mode, sigma){
+  return(mean^2*( (1-mean)/(sigma^2) - 1/mean ))
+}
+
+# The function to compute the beta of the beta given mean and alpha
+beta <- function(alpha, mode){
+  return(
+    ((alpha - 1) - (alpha - 2)*mode)/mode
+  )
+}
+
+root_func <- function(m, v){
+  uni_func <- function(x){
+    return(v*x^3 + x^2*(m^3-m^2 + 7*m*v - 3*v) + x*(-2*m^3 + 16*(m^2)*v + m^2 -
+                                             14*m*v + 3*v) + (12*(m^3)*v -16*(m^2)*v +
+                                                                7*m*v - v))
+  }
+  return(uniroot(uni_func, lower=1, upper=50)$root)
+    
+}
+```
+
+
+
+To retrieve the parameters of the beta frome mode and standard deviation we needed to find numerically the root of the equation of the alpha parameter given mode and variance. 
+
+
+```{r}
+top_names_hit_miss$alpha <- unlist(map2(.x= top_names_hit_miss$Probabilities, 
+                                        .y=top_names_hit_miss$std^2, .f=root_func))
+
+top_names_hit_miss$beta <- beta(alpha = top_names_hit_miss$alpha, 
+                                  mode = top_names_hit_miss$Probabilities)
+
+
+top_names_hit_miss_w$alpha <- unlist(map2(.x= top_names_hit_miss_w$Probabilities, 
+                                        .y=top_names_hit_miss_w$std^2, .f=root_func))
+
+top_names_hit_miss_w$beta <- beta(alpha = top_names_hit_miss_w$alpha, 
+                                  mode = top_names_hit_miss_w$Probabilities)
+```
+
+
+```{r}
+head(top_names_hit_miss)
+head(top_names_hit_miss_w)
+```
+
+
+
+
+
+```{r}
+x_axis <- seq(0, 1, 0.001)
+min_idx <- which.min(top_names_hit_miss$Probabilities)
+min_prob <- top_names_hit_miss[min_idx,]
+
+max_idx <- which.max(top_names_hit_miss$Probabilities)
+max_prob <- top_names_hit_miss[max_idx,]
+
+plot <- ggplot() +
+        geom_line(aes(x=x_axis, y=dbeta(x=x_axis, shape1 = min_prob$alpha, shape2 = min_prob$beta),
+                                        color = as.character(min_prob$Names))) +
+        geom_line(aes(x=x_axis, y=dbeta(x=x_axis, shape1 = max_prob$alpha, shape2 = max_prob$beta),
+                                        color = as.character(max_prob$Names))) +
+        labs(color = 'Legend', x='Probability P', y='Prior PDF', title=
+               'Prior of the best and worst standing shooters') +
+        scale_color_manual(values= c("Kuehn Johannes " = 'firebrick', "Birnbacher Andreas " = 'navy')) +
+        theme_bw()
+plot
+```
+
+We see how the prior probability of a sharp-shoother like Birnbacher is peaked far to the right with respect to a very good skier but someone who's standing shooting is a liability like Johannes Kuehn.
+
+
+
+
+```{r}
+x_axis <- seq(0, 1, 0.001)
+min_idx_w <- which.min(top_names_hit_miss_w$Probabilities)
+min_prob_w <- top_names_hit_miss_w[min_idx_w,]
+
+max_idx_w <- which.max(top_names_hit_miss_w$Probabilities)
+max_prob_w <- top_names_hit_miss_w[max_idx_w,]
+
+plot <- ggplot() +
+        geom_line(aes(x=x_axis, y=dbeta(x=x_axis, shape1 = min_prob_w$alpha, shape2 = min_prob_w$beta),
+                                        color = as.character(min_prob_w$Names))) +
+        geom_line(aes(x=x_axis, y=dbeta(x=x_axis, shape1 = max_prob_w$alpha, shape2 = max_prob_w$beta),
+                                        color = as.character(max_prob_w$Names))) +
+        labs(color = 'Legend', x='Probability P', y='Prior PDF', title=
+               'Prior of the best and worst standing shooters') +
+        scale_color_manual(values= c("Sola Hanna " = 'firebrick', "Skardino Nadezhda " = 'navy')) +
+        theme_bw()
+plot
+```
+Also here we notice how the a strong skier but inconsistent shooter like Hanna Sola has the prior peaked at the worst percentage while in this battle within the Belarus' borders Skardino performs much better.
+
+
+
+```{r}
+plot <- ggplot() +
+        geom_point(aes(x=rep(x_axis, nrow(top_names_hit_miss)),
+                       y=dbeta(x=rep(x_axis, nrow(top_names_hit_miss)), 
+                        shape1 = top_names_hit_miss$alpha, shape2 = top_names_hit_miss$beta 
+                        ),color=rep(x_axis, nrow(top_names_hit_miss))), size=0.8) +
+        
+        labs(color = 'Probability \nColor map', x='P', y='Prior PDF', title=
+               'Priors computed') +
+        
+        theme_bw()
+plot
+```
+
+```{r}
+x_axis <- seq(0, 1, 0.0001)
+plot <- ggplot() +
+        geom_point(aes(x=rep(x_axis, nrow(top_names_hit_miss_w)),
+                       y=dbeta(x=rep(x_axis, nrow(top_names_hit_miss_w)), 
+                        shape1 = top_names_hit_miss_w$alpha, shape2 = top_names_hit_miss_w$beta 
+                        ),color=rep(x_axis, nrow(top_names_hit_miss_w))), size=0.8) +
+        
+        labs(color = 'Probability \nColor map', x='P', y='Prior PDF', title=
+               'Priors computed') +
+        
+        theme_bw()
+plot
+```
+We see how here the transition from low percentages to high ones is much smoother than in the men case where we see a couple of low but very consistent percentages.
+
+
+
+The next step is to insert the parameters of our priors into the efficiency_df data frame
+
+
+```{r}
+# Hits top 10
+efficiency_df$Hits_top_ten <- efficiency_df$`Attempts top 10` - efficiency_df$`Misses top 10`
+# Hits when not in the top 10
+efficiency_df$Hits_no_top_ten <- efficiency_df$`Attempts no top 10` - efficiency_df$`Misses not top 10`
+# Values of the alpha parameter of the beta
+efficiency_df$alpha_prior <- top_names_hit_miss$alpha
+# Values of the beta parameter of the beta
+efficiency_df$beta_prior <- top_names_hit_miss$beta
+# alpha of the posterior when in the top 10
+efficiency_df$alpha_post_10 <- efficiency_df$alpha_prior + efficiency_df$Hits_top_ten
+# beta of the posterior when in the top 10
+efficiency_df$beta_post_10 <- efficiency_df$beta_prior + 
+  efficiency_df$`Attempts top 10` - efficiency_df$Hits_top_ten
+# alpha of the posterior when not in the top 10
+efficiency_df$alpha_post_no10 <- efficiency_df$alpha_prior + efficiency_df$Hits_no_top_ten
+# beta of the posterior when not in the top 10
+efficiency_df$beta_post_no10 <- efficiency_df$beta_prior + 
+  efficiency_df$`Attempts no top 10` - efficiency_df$Hits_no_top_ten
+
+# Hits top 10
+efficiency_df_w$Hits_top_ten <- efficiency_df_w$`Attempts top 10` - efficiency_df_w$`Misses top 10`
+# Hits when not in the top 10
+efficiency_df_w$Hits_no_top_ten <- efficiency_df_w$`Attempts no top 10` - efficiency_df_w$`Misses not top 10`
+# Values of the alpha parameter of the beta
+efficiency_df_w$alpha_prior <- top_names_hit_miss_w$alpha
+# Values of the beta parameter of the beta
+efficiency_df_w$beta_prior <- top_names_hit_miss_w$beta
+# alpha of the posterior when in the top 10
+efficiency_df_w$alpha_post_10 <- efficiency_df_w$alpha_prior + efficiency_df_w$Hits_top_ten
+# beta of the posterior when in the top 10
+efficiency_df_w$beta_post_10 <- efficiency_df_w$beta_prior + 
+  efficiency_df_w$`Attempts top 10` - efficiency_df_w$Hits_top_ten
+# alpha of the posterior when not in the top 10
+efficiency_df_w$alpha_post_no10 <- efficiency_df_w$alpha_prior + efficiency_df_w$Hits_no_top_ten
+# beta of the posterior when not in the top 10
+efficiency_df_w$beta_post_no10 <- efficiency_df_w$beta_prior + 
+  efficiency_df_w$`Attempts no top 10` - efficiency_df_w$Hits_no_top_ten
+
+
+(efficiency_df)
+efficiency_df_w
+```
+
+
+
+
+
+
+```{r}
+# Function to compute the mode of the beta
+mode_beta <- function(alpha, beta){
+  return( (alpha - 1)/(alpha + beta - 2) )
+}
+```
+
+
+```{r}
+efficiency_df$mode_post_no10 <- mode_beta(efficiency_df$alpha_post_no10, efficiency_df$beta_post_no10)
+efficiency_df$mode_post_10 <- mode_beta(efficiency_df$alpha_post_10, efficiency_df$beta_post_10)
+
+efficiency_df_w$mode_post_no10 <- mode_beta(efficiency_df_w$alpha_post_no10, efficiency_df_w$beta_post_no10)
+efficiency_df_w$mode_post_10 <- mode_beta(efficiency_df_w$alpha_post_10, efficiency_df_w$beta_post_10)
+```
+
+
+
+
+```{r}
+efficiency_df$mode_eff <- (efficiency_df$mode_post_no10 - efficiency_df$mode_post_10)/
+                          efficiency_df$mode_post_no10
+max_eff <- efficiency_df[which.max(efficiency_df$mode_eff),]
+min_eff <- efficiency_df[which.min(efficiency_df$mode_eff),]
+
+
+
+efficiency_df_w$mode_eff <- (efficiency_df_w$mode_post_no10 - efficiency_df_w$mode_post_10)/
+                          efficiency_df_w$mode_post_no10
+max_eff_w <- efficiency_df_w[which.max(efficiency_df_w$mode_eff),]
+min_eff_w <- efficiency_df_w[which.min(efficiency_df_w$mode_eff),]
+```
+
+
+
+
+
+```{r}
+efficiency_list <- list()
+for (athlete in efficiency_df$`Full Names`){
+  efficiency_list[[athlete]] <- 100*(rbeta(n = 10000, shape1 = 
+                                     efficiency_df[efficiency_df$`Full Names`==athlete,]$alpha_post_no10, 
+                                     shape2 =
+                                       efficiency_df[efficiency_df$`Full Names`==athlete,]$beta_post_no10) -
+                            rbeta(n = 10000, shape1 = 
+                                     efficiency_df[efficiency_df$`Full Names`==athlete,]$alpha_post_10, 
+                                     shape2 =
+                                       efficiency_df[efficiency_df$`Full Names`==athlete,]$beta_post_10))/
+                            (rbeta(n = 10000, shape1 = 
+                                     efficiency_df[efficiency_df$`Full Names`==athlete,]$alpha_post_no10, 
+                                     shape2 =
+                                       efficiency_df[efficiency_df$`Full Names`==athlete,]$beta_post_no10))
+                                       
+}
+
+
+
+efficiency_list_w <- list()
+for (athlete in efficiency_df_w$`Full Names`){
+  efficiency_list_w[[athlete]] <- 100*(rbeta(n = 10000, shape1 = 
+                                     efficiency_df_w[efficiency_df_w$`Full Names`==athlete,]$alpha_post_no10, 
+                                     shape2 =
+                                       efficiency_df_w[efficiency_df_w$`Full Names`==athlete,]$beta_post_no10) -
+                            rbeta(n = 10000, shape1 = 
+                                     efficiency_df_w[efficiency_df_w$`Full Names`==athlete,]$alpha_post_10, 
+                                     shape2 =
+                                       efficiency_df_w[efficiency_df_w$`Full Names`==athlete,]$beta_post_10))/
+                            (rbeta(n = 10000, shape1 = 
+                                     efficiency_df_w[efficiency_df_w$`Full Names`==athlete,]$alpha_post_no10, 
+                                     shape2 =
+                                       efficiency_df_w[efficiency_df_w$`Full Names`==athlete,]$beta_post_no10))
+                                       
+}
+```
+
+
+
+```{r}
+# Definitio of the Freedman Diaconis rule
+bins_fd <- function(vec) {
+  diff(range(vec)) / (2 * IQR(vec) / length(vec)^(1/3))
+}
+```
+
+
+
+```{r}
+plot <- ggplot() +
+        geom_histogram(aes(efficiency_list[['Fourcade Martin ']], y=..density..), 
+                       fill='firebrick', alpha=0.9, color='black', 
+                       bins = bins_fd(efficiency_list[['Fourcade Martin ']])) +
+        geom_histogram(aes(efficiency_list[['Anev Krasimir ']], y=..density..), 
+                       fill='navy', alpha=0.9, color='black', 
+                       bins=bins_fd(efficiency_list[['Anev Krasimir ']])) +
+        theme_bw()
+plot
+```
+Here we can see how Martin Fourcade (red histogram), who appeared the most percentually in the top 10, has a perfect 0 "efficiency". A sympton that he was a cold blooded shooter in the clutch.
+Krasimir (blue histogram) instead maybe lacking a little bit of experience sow his percentages drop considerably... maybe being in thick of things made his rifle tremble with a 10% "efficiency".
+
+
+
+
+```{r}
+plot <- ggplot() +
+        geom_histogram(aes(efficiency_list_w[['Domracheva Darya ']], y=..density..), 
+                       fill='firebrick', alpha=0.9, color='black', 
+                       bins = bins_fd(efficiency_list_w[['Domracheva Darya ']])) +
+        geom_histogram(aes(efficiency_list_w[['Puskarcikova Eva ']], y=..density..), 
+                       fill='navy', alpha=0.9, color='black', 
+                       bins=bins_fd(efficiency_list_w[['Puskarcikova Eva ']])) +
+        theme_bw()
+plot
+```
+
+The biggest difference we notice is how Darya Domracheva (blue histogram) is not perfect like Martin Fourcade as her efficiency deviates from zero. Eva Puskarcikova (red histogram) less used to shooting for high stakes does perform worse but the difference is much smaller... maybe Thomas Bormolini has something to do with it.
+
+
+```{r}
+plot <- ggplot() +
+        geom_histogram(aes(efficiency_list[[min_eff$`Full Names`]], y=..density..), 
+                       fill='firebrick', alpha=0.9, color='black', 
+                       bins = bins_fd(efficiency_list[[min_eff$`Full Names`]])) +
+        geom_histogram(aes(efficiency_list[[max_eff$`Full Names`]], y=..density..), 
+                       fill='navy', alpha=0.9, color='black', 
+                       bins=bins_fd(efficiency_list[[max_eff$`Full Names`]])) +
+        theme_bw()
+plot
+```
+In the above plot we see how Felix Leitner (red histogram) even improved his accuracy in meaningful shootings
+while Domink Windisch (blue histogram) was the one who suffered the most in this situation (again Oestersund 2019 is not counted). We all know that Dominik is not the most consistent but when we talk about single races in big events he gifted us all great memories.
+
+```{r}
+plot <- ggplot() +
+        geom_histogram(aes(efficiency_list_w[[min_eff_w$`Full Names`]], y=..density..), 
+                       fill='firebrick', alpha=0.9, color='black', 
+                       bins = bins_fd(efficiency_list_w[[min_eff_w$`Full Names`]])) +
+        geom_histogram(aes(efficiency_list_w[[max_eff_w$`Full Names`]], y=..density..), 
+                       fill='navy', alpha=0.9, color='black', 
+                       bins=bins_fd(efficiency_list_w[[max_eff_w$`Full Names`]])) +
+        theme_bw()
+plot
+```
+```{r}
+min_eff_w$`Full Names`
+max_eff_w$`Full Names`
+```
+Laena Hacki here takes the prize of having the coldest blood while Mona Brorsson which is known for her podium-loosing last shots is indeed the biathlete with the highest "efficiency"
+
+
+```{r}
+names_ordered <- names(named_percentages[rev(order_perc)])
+
+
+plot <- ggplot() +
+        geom_density(aes(efficiency_list[[names_ordered[1]]], y=..density..,
+                           color=names_ordered[1]) 
+                       , alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list[[names_ordered[6]]], y=..density..,
+                          color= names_ordered[6]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list[[names_ordered[7]]], y=..density..,
+                           color =  names_ordered[7]) 
+                       , alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list[[names_ordered[14]]], y=..density..,
+                           color= names_ordered[14]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list[[names_ordered[9]]], y=..density..,
+                           color= names_ordered[9]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list[[names_ordered[11]]], y=..density..,
+                           color= names_ordered[11]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list[[names_ordered[12]]], y=..density..,
+                           color= names_ordered[12]), 
+                        alpha=0.5, lwd=1) +
+        labs(x='Effciency', y='PDF') +
+  
+        theme_bw()
+plot
+```
+In this density estimate plot the each biathlete represented has a meaningful statistics regarding both 
+the presences in the top 10 and the presences outside of it.
+We can see how Emil Svendsen noticeably improves with an efficiency of almost -10%, while Christiansen who is notoriously doesn't posses the heart of a lion ruins his percentages. Simon Eder who is going to become the athlete with the most 0s in history has an almost dramatic drop for his standards in standing shooting when entering the last shooting range in the top 10.
+In Vetle's defense in the Beijiing olympics he pulled out a couple of rabbits from his hat by winning the relay on the last shot and likewise the mass start bronze.
+
+
+
+
+```{r}
+names_ordered_w <- names(named_percentages_w[rev(order_perc_w)])
+
+
+plot <- ggplot() +
+        geom_density(aes(efficiency_list_w[[names_ordered_w[1]]], y=..density..,
+                           color=names_ordered_w[1]) 
+                       , alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list_w[[names_ordered_w[6]]], y=..density..,
+                          color= names_ordered_w[6]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list_w[[names_ordered_w[33]]], y=..density..,
+                           color =  names_ordered_w[33]) 
+                       , alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list_w[[names_ordered_w[4]]], y=..density..,
+                           color= names_ordered_w[4]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list_w[[names_ordered_w[45]]], y=..density..,
+                           color= names_ordered_w[45]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list_w[[names_ordered_w[18]]], y=..density..,
+                           color= names_ordered_w[18]), 
+                        alpha=0.5, lwd=1) +
+        geom_density(aes(efficiency_list_w[[names_ordered_w[12]]], y=..density..,
+                           color= names_ordered_w[12]), 
+                        alpha=0.5, lwd=1) +
+        labs(x='Effciency', y='PDF') +
+  
+        theme_bw()
+plot
+```
+In this set of highly represented athletes we see how consistent are the 2 italians with Lisa that improves her performance and with Dorothea that slightly makes it worse (in terms of "efficiency").
+We can see how respecting her family traditions Kristina Reztsova has a very high "efficiency" volatility,  she performs good on skis but she isn't quite the cross country skier lend to biathlon like her mother Anfisa was.
+
+## Confronting men and women
+
+What we do now is to look for a difference in the efficiency between men and women, we take into consideration all the men together and all the women together, compute the two separate efficiencies and then use a gaussian approximation to inspect their difference.
+To achieve that we made use of a MCMC method based on Gibbs sampling thanks to the Jags R library.
+
+```{r}
+# Analytical part
+
+# Computing the total attempts
+top_names_tot_att10 <- sum(efficiency_df$`Attempts top 10`)
+top_names_tot_att10_w <- sum(efficiency_df_w$`Attempts top 10`)
+
+# Computing the total hits
+top_names_tot_hit10 <- sum(efficiency_df$Hits_top_ten)
+top_names_tot_hit10_w <- sum(efficiency_df_w$Hits_top_ten)
+
+# Computing the total attempts outside the top 10
+top_names_tot_att_no10 <- sum(efficiency_df$`Attempts no top 10`)
+top_names_tot_att_no10_w <- sum(efficiency_df_w$`Attempts no top 10`)
+
+# Computing the total hits outside the top 10
+top_names_tot_hit_no10 <- sum(efficiency_df$Hits_no_top_ten)
+top_names_tot_hit_no10_w <- sum(efficiency_df_w$Hits_no_top_ten)
+
+# Computing the desired mode for teh prior
+mode_men <- (top_names_tot_hit10 + top_names_tot_hit_no10)/
+  (top_names_tot_att10 + top_names_tot_att_no10)
+mode_women <- (top_names_tot_hit10_w + top_names_tot_hit_no10_w)/
+  (top_names_tot_att10_w + top_names_tot_att_no10_w)
+
+# Computing the desired standard deviation for the prior
+std_men <- sd(hit_miss$Probabilities)
+std_women <- sd(hit_miss_w$Probabilities)
+
+# Computing the alpha prior
+alpha_prior_men <- unlist(map2(.x= mode_men, .y=std_men^2, .f=root_func))
+alpha_prior_women <- unlist(map2(.x= mode_women, .y=std_women^2, .f=root_func))
+
+# Computing the beta prior
+beta_prior_men <- beta(mode = mode_men, alpha = alpha_prior_men)
+beta_prior_women <- beta(mode = mode_women, alpha = alpha_prior_women)
+
+# Computing the alpha posterior
+alpha_post_men_10 <- alpha_prior_men + top_names_tot_hit10
+alpha_post_women_10 <- alpha_prior_women + top_names_tot_hit10_w
+
+# Computing the alpha posterior outside the top 10 
+alpha_post_men_no10 <- alpha_prior_men + top_names_tot_hit_no10
+alpha_post_women_no10 <- alpha_prior_women + top_names_tot_hit_no10_w
+
+# Computing the beta posterior
+beta_post_men_10 <- beta_prior_men + top_names_tot_att10 - top_names_tot_hit10
+beta_post_women_10 <- beta_prior_women + top_names_tot_att10_w - top_names_tot_hit10_w
+
+# Computing the beta posterior outside the top 10
+beta_post_men_no10 <- beta_prior_men + top_names_tot_att_no10 - top_names_tot_hit_no10
+beta_post_women_no10 <- beta_prior_women + top_names_tot_att_no10_w - top_names_tot_hit_no10_w
+
+# Mean of the beta distribution posterior
+mean_10_men <- alpha_post_men_10/(alpha_post_men_10+beta_post_men_10)
+mean_10_women <- alpha_post_women_10/(alpha_post_women_10+beta_post_women_10)
+
+# Variance of the beta distribution posterior
+var_10_men <- (alpha_post_men_10*beta_post_men_10)/( (alpha_post_men_10 + beta_post_men_10)^2*
+                                               (alpha_post_men_10 + beta_post_men_10 + 1))
+var_10_women <- (alpha_post_women_10*beta_post_women_10)/( (alpha_post_women_10 + beta_post_women_10)^2*
+                                               (alpha_post_women_10 + beta_post_women_10 + 1))
+
+# Variance of the beta distribution posterior outside the top 10
+var_no10_men <- (alpha_post_men_no10*beta_post_men_no10)/( (alpha_post_men_no10 + beta_post_men_no10)^2*
+                                               (alpha_post_men_no10 + beta_post_men_no10 + 1))
+var_no10_women <- (alpha_post_women_no10*beta_post_women_no10)/
+  ( (alpha_post_women_no10 + beta_post_women_no10)^2*
+                                               (alpha_post_women_no10 + beta_post_women_no10 + 1))
+
+```
+
+
+
+
+```{r}
+# Defining the Jags arrays
+n_samples <- 2000
+jags_men_10 <- 100*(rbeta(n = n_samples, shape1 = alpha_post_men_no10, shape2 = beta_post_men_no10) -
+                  rbeta(n = n_samples, shape1 = alpha_post_men_10, shape2 = beta_post_men_10))/
+                rbeta(n = n_samples, shape1 = alpha_post_men_no10, shape2 = beta_post_men_no10)
+
+
+jags_women_10 <- 100*(rbeta(n = n_samples, shape1 = alpha_post_women_no10, shape2 = beta_post_women_no10) -
+                  rbeta(n = n_samples, shape1 = alpha_post_women_10, shape2 = beta_post_women_10))/
+                rbeta(n = n_samples, shape1 = alpha_post_women_no10, shape2 = beta_post_women_no10)
+
+jags_total <- jags_men_10 - jags_women_10
+```
+
+
+We choose 4 chains for the sampling along 1000 burn-in samples and 2000 steps for each chain.
+
+```{r}
+# Defining the Jags model
+data <- list(X = jags_total, n = n_samples)
+model <- jags.model(file = 'normal.bug', n.chains = 4, data = data)
+
+update(model, 1000)
+
+chain <- coda.samples(model = model, c('mean', 'precision'),  n.iter=10000)
+print(summary(chain))
+```
+
+
+```{r}
+# Flattening the Jags chains
+mean_jags <- c(unname(chain[[1]])[,1], unname(chain[[2]])[,1], unname(chain[[3]])[,1], unname(chain[[4]])[,1])
+precision_jags <- c(unname(chain[[1]])[,2], 
+                    unname(chain[[2]])[,2], unname(chain[[3]])[,2], unname(chain[[4]])[,2])
+```
+
+
+
+```{r}
+# Plot of the mean parameter
+plot <- ggplot() +
+        geom_histogram(aes(mean_jags, y=..density..), 
+                       fill='firebrick', alpha=0.9, color='black', 
+                       bins = bins_fd(mean_jags)) +
+        
+        theme_bw()
+
+
+
+results_plot <- ggplot_build(plot)$data[[1]]
+
+y_max_idx <- which.max(ggplot_build(plot)$data[[1]]$y)
+
+mean_max <- (ggplot_build(plot)$data[[1]]$xmax[y_max_idx] + ggplot_build(plot)$data[[1]]$xmin[y_max_idx])/2
+
+
+plot <- plot + geom_vline(aes(xintercept=mean_max))+
+        theme_bw()
+plot
+```
+
+That is the posterior distribution of the mean of the gaussian as returned by the chains.
+We can see that it is peaked at a negative value pointing that men are slightly less efficient than women again, efficiency is a negative thing here: higher efficiency means you make more misses when you are in the top 10. Further below we estimate if this fact is due to chance alone or if we can state that there is an actual difference.
+
+```{r}
+# Plot of the precision paramters
+plot <- ggplot() +
+        geom_histogram(aes(precision_jags, y=..density..), 
+                       fill='firebrick', alpha=0.9, color='black', 
+                       bins = bins_fd(mean_jags)) +
+        theme_bw()
+
+plot
+results_plot <- ggplot_build(plot)$data[[1]]
+
+y_max_idx <- which.max(ggplot_build(plot)$data[[1]]$y)
+
+precision_max <- (ggplot_build(plot)$data[[1]]$xmax[y_max_idx] +
+                    ggplot_build(plot)$data[[1]]$xmin[y_max_idx])/2 
+
+
+```
+The precision of the gaussian defined as $$\tau = \frac{1}{\sigma ^2}$$
+
+
+```{r}
+# Standard deviation given by the posterior
+std_max <- sqrt(1/precision_max)
+std_max
+```
+
+
+```{r}
+# Normal given our retrieved meanand variance 
+x_axis <- seq(-5, 5, 0.001)
+plot <- ggplot() +
+        geom_line(aes(x=x_axis, y=dnorm(x = x_axis, mean = mean_max, sd = std_max))) +
+        geom_vline(xintercept = 0) +
+        geom_vline(xintercept = mean_max) +
+        theme_bw()
+plot
+```
+We can see how the normal distribution of the efficiency difference between male and female athletes, obtained taking the maximum of the posteriors, is centered pretty nicely around 0. We can then state that every hypothesis testing we could do looking for a difference in the efficiencies would reject the latter proposition meaning that the slight advantage that men seemed to have can be attributed to chances.
+
+```{r}
+# Visual representation of the chains
+plot(chain)
+```
+
+The coda plots of the chain signal for a nice convergence of each of the 4 processes. We also see that the burn-in chosen was sufficiently long.
+
+## Hypothesis testing
+The aim of this section is to perform an hypothesis test to prove or disproof the myth of the very last shot in an individual race. How many times we have seen a medal or a podium being thrown out after a perfect 19/19, our minds immediately go at the last two Olympics where first Tarjei Bø and then Maxim Tsvetkov lost the gold...
+We take into consideration two different sets: the first is all the records when a given athlete arrives at the last shot with all hits in individual races, the second is built equivalently but taking into account pursuits and mass starts.
+We proceed as follows: we set up the null hypothesis $H_0$ as the probability of hitting the last shot of the individual being greater or equal with respect to the other two race formats.  The alternative hypothesis is that the last shot in the individual is really that more difficult than the others.
+
+```{r}
+# Selecting the years were we have shooting data
+years_shooting <-years[3:length(years)]
+```
+
+
+
+```{r}
+# Importing thr shooting data for women
+df_shooting_women <- data.frame()
+
+
+
+for (i in seq_along(years_shooting)){
+  for(j in seq_along(locations[[years_shooting[i]]])){
+    files <- list.files(locations_path_women[[years_shooting[i]]],
+                  pattern=sprintf('shooting.%s',locations[[years_shooting[i]]][j]),full.names = TRUE )
+    # Importing the data frame
+    for (file in files){
+      
+      # Updating the race_id that will act as our primary key of the data set
+      race_id <- race_id + 1
+      
+      list_id_women[[file]] <- race_id
+      
+      df_res <- read.csv(file = file, sep = '\t')
+      
+      # Raising a flag if the Rank column has not allowable columns
+      if(length(df_res$Rank[df_res$Rank %!in% allowables]) !=0){cat('wooow problem, in', file)}
+      
+      # Updating the count of bibs > 120
+      res_over_women <- res_over_women + length(df_res$Rank[destring(df_res$Rank) > 120]
+             [! is.na(df_res$Rank[destring(df_res$Rank) > 120])])
+      
+     
+      
+      # Checking for possible inconsistencies in the data set
+      if('Rank' %!in% colnames(df_res)){
+        cat(paste('There is a mistake in', file))
+      }
+      # Adding the isolated.pursuit column to the non-pursuit races in order to have the same
+      # columns to perform the rbind operation
+      
+
+      # Adding the column specifying the year of the race
+      df_res$year <- rep(years[i], nrow(df_res))
+      # Adding the column specifying the venue of the race
+      df_res$location <- rep(locations[[years[i]]][j], nrow(df_res))
+      
+      # Adding the column specifying the type of the race
+      if (grepl(pattern = 'pursuit', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Pursuit', nrow(df_res))
+      }
+      else if (grepl(pattern = 'individual', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Individual', nrow(df_res))
+      }
+      else if (grepl(pattern = 'mass_start', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Mass start', nrow(df_res))
+      }
+      else if (grepl(pattern = 'sprint', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Sprint', nrow(df_res))
+        df_res$Shooting.3 <- rep(0, nrow(df_res))
+        df_res$Shooting.4 <- rep(0, nrow(df_res))
+        df_res$Lane.2 <- rep(0, nrow(df_res))
+        df_res$Lane.3 <- rep(0, nrow(df_res))
+        df_res$Time.2 <- rep(0, nrow(df_res))
+        df_res$Time.3 <- rep(0, nrow(df_res))
+        
+      }
+      else{
+        cat(paste('There is a mistake in',file,
+                  'no race type specified'))
+      }
+      
+      # Filling the list as we did for the men, popping out the disqualified is due to the 
+      # Glaryzina affair
+      # Adding the column with the id of the race
+      df_res$ID <-rep( list_id_women[[paste(df_res$race_type[1], years_shooting[i],
+                                             locations[[years_shooting[i]]][j], 
+                         df_res$Given.Name[df_res$Rank %!in% c('DSQ')][1],  
+                         df_res$Given.Name[df_res$Rank %!in% c('DSQ')][2])]], nrow(df_res))
+      
+      
+      # Updating the final data frame
+      
+      df_shooting_women <- rbind(df_shooting_women, df_res)
+    }
+  }
+}
+```
+
+
+```{r}
+head(df_shooting_women)
+```
+
+
+
+
+```{r}
+# Importing the shooting data for women
+df_shooting_men <- data.frame()
+
+
+
+for (i in seq_along(years_shooting)){
+  for(j in seq_along(locations[[years_shooting[i]]])){
+    files <- list.files(locations_path_men[[years_shooting[i]]],
+                  pattern=sprintf('shooting.%s',locations[[years_shooting[i]]][j]),full.names = TRUE )
+    # Importing the data frame
+    for (file in files){
+      # Updating the race_id that will act as our primary key of the data set
+      race_id <- race_id + 1
+      
+      list_id_men[[file]] <- race_id
+      
+      df_res <- read.csv(file = file, sep = '\t')
+      
+      # Raising a flag if the Rank column has not allowable columns
+      if(length(df_res$Rank[df_res$Rank %!in% allowables]) !=0){cat('wooow problem, in', file)}
+      
+      # Updating the count of bibs > 120
+      res_over_men <- res_over_men + length(df_res$Rank[destring(df_res$Rank) > 120]
+             [! is.na(df_res$Rank[destring(df_res$Rank) > 120])])
+      
+     
+      
+      # Checking for possible inconsistencies in the data set
+      if('Rank' %!in% colnames(df_res)){
+        cat(paste('There is a mistake in', file))
+      }
+      # Adding the isolated.pursuit column to the non-pursuit races in order to have the same
+      # columns to perform the rbind operation
+      
+
+      # Adding the column specifying the year of the race
+      df_res$year <- rep(years[i], nrow(df_res))
+      # Adding the column specifying the venue of the race
+      df_res$location <- rep(locations[[years[i]]][j], nrow(df_res))
+      
+      # Adding the column specifying the type of the race
+      if (grepl(pattern = 'pursuit', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Pursuit', nrow(df_res))
+      }
+      else if (grepl(pattern = 'individual', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Individual', nrow(df_res))
+      }
+      else if (grepl(pattern = 'mass_start', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Mass start', nrow(df_res))
+      }
+      else if (grepl(pattern = 'sprint', x =file, fixed=TRUE)){
+        df_res$race_type <- rep('Sprint', nrow(df_res))
+        df_res$Shooting.3 <- rep(0, nrow(df_res))
+        df_res$Shooting.4 <- rep(0, nrow(df_res))
+        df_res$Lane.2 <- rep(0, nrow(df_res))
+        df_res$Lane.3 <- rep(0, nrow(df_res))
+        df_res$Time.2 <- rep(0, nrow(df_res))
+        df_res$Time.3 <- rep(0, nrow(df_res))
+        
+      }
+      else{
+        cat(paste('There is a mistake in',file,
+                  'no race type specified'))
+      }
+      
+      # Filling the list as we did for the men, popping out the disqualified is due to the 
+      # Glaryzina affair
+      # Adding the column with the id of the race
+      df_res$ID <-rep( list_id_men[[paste(df_res$race_type[1], years_shooting[i],
+                                             locations[[years_shooting[i]]][j], 
+                         df_res$Given.Name[df_res$Rank %!in% c('DSQ')][1],  
+                         df_res$Given.Name[df_res$Rank %!in% c('DSQ')][2])]], nrow(df_res))
+      
+      
+      # Updating the final data frame
+      
+      df_shooting_men <- rbind(df_shooting_men, df_res)
+    }
+  }
+}
+```
+
+
+
+
+```{r}
+# Restricting to individual competition
+shooting_ind_men <- df_shooting_men[df_shooting_men$race_type == 'Individual',]
+shooting_ind_women <- df_shooting_women[df_shooting_women$race_type == 'Individual',]
+```
+
+
+
+
+
+```{r}
+# The function to extract the outcome of the last shot
+last_shot <- function(x){
+  string <- unlist(strsplit((x),""))
+  shots <- string[seq(length(string)-4, length(string))]
+  if (5 %in% as.numeric(shots)){
+    return('Hit')
+  }
+  else{return('Miss')}
+}
+```
+
+
+
+
+```{r}
+# Applying the last shot function
+shooting_ind_men$last_shot <- sapply(X = shooting_ind_men$Shooting.4, FUN = last_shot)
+shooting_ind_women$last_shot <- sapply(X = shooting_ind_women$Shooting.4, FUN = last_shot)
+```
+
+
+```{r}
+# The function to extract the outcome the first 19 shots
+hits_19 <- function(shooting1, shooting2, shooting3, shooting4){
+  string_1 <- unlist(strsplit((shooting1),""))
+  string_2 <- unlist(strsplit((shooting2),""))
+  string_3 <- unlist(strsplit((shooting3),""))
+  string_4 <- unlist(strsplit((shooting4),""))
+  shots_1 <- string_1[seq(length(string_1)-4, length(string_1))]
+  shots_2 <- string_2[seq(length(string_2)-4, length(string_2))]
+  shots_3 <- string_3[seq(length(string_3)-4, length(string_3))]
+  shots_4 <- string_4[seq(length(string_4)-4, length(string_4))]
+  shots_4 <- shots_4[shots_4 != 5]
+  
+  shots_1 <- shots_1[shots_1 != 0]
+  shots_2 <- shots_2[shots_2 != 0]
+  shots_3 <- shots_3[shots_3 != 0]
+  shots_4 <- shots_4[shots_4 != 0]
+  return(length(as.numeric(shots_1)) +
+           length(as.numeric(shots_2)) +
+           length(as.numeric(shots_3)) +
+           length(as.numeric(shots_4)))
+}
+ 
+```
+
+
+
+
+
+```{r}
+# Defining the lists that the pmap function takes in input
+list_men_19 <- list(shooting1 = shooting_ind_men$Shooting.1,
+                    shooting2 = shooting_ind_men$Shooting.2,
+                    shooting3 = shooting_ind_men$Shooting.3,
+                    shooting4 = shooting_ind_men$Shooting.4)
+
+list_women_19 <- list(shooting1 = shooting_ind_women$Shooting.1,
+                    shooting2 = shooting_ind_women$Shooting.2,
+                    shooting3 = shooting_ind_women$Shooting.3,
+                    shooting4 = shooting_ind_women$Shooting.4)
+
+# Calling the pmap function to retrieve the outpu of the first 19 shots
+shooting_ind_men$shots_19 <- unlist(pmap(.l = list_men_19, .f = hits_19))
+shooting_ind_women$shots_19 <- unlist(pmap(.l = list_women_19, .f = hits_19))
+```
+
+
+
+
+
+
+```{r}
+# Restricting the analysis to perfect shots through the first 19 attempts
+under_pressure_women <- shooting_ind_women[shooting_ind_women$shots_19==19,]
+under_pressure_men <- shooting_ind_men[shooting_ind_men$shots_19==19,]
+```
+
+
+
+```{r}
+head(under_pressure_men)
+```
+
+
+
+
+
+
+```{r}
+# Doing the same thing of the individuals for the remaining 4 range races
+shoothing_pursuit_men <- df_shooting_men[df_shooting_men$race_type == 'Pursuit',]
+shoothing_pursuit_women <- df_shooting_women[df_shooting_women$race_type == 'Pursuit',]
+shoothing_pursuit_men$last_shot <- sapply(X = shoothing_pursuit_men$Shooting.4, FUN = last_shot)
+shoothing_pursuit_women$last_shot <- sapply(X = shoothing_pursuit_women$Shooting.4, FUN = last_shot)
+
+list_men_19_p <- list(shooting1 = shoothing_pursuit_men$Shooting.1,
+                    shooting2 = shoothing_pursuit_men$Shooting.2,
+                    shooting3 = shoothing_pursuit_men$Shooting.3,
+                    shooting4 = shoothing_pursuit_men$Shooting.4)
+
+list_women_19_p <- list(shooting1 = shoothing_pursuit_women$Shooting.1,
+                    shooting2 = shoothing_pursuit_women$Shooting.2,
+                    shooting3 = shoothing_pursuit_women$Shooting.3,
+                    shooting4 = shoothing_pursuit_women$Shooting.4)
+
+shoothing_pursuit_men$shots_19 <- unlist(pmap(.l = list_men_19_p, .f = hits_19))
+shoothing_pursuit_women$shots_19 <- unlist(pmap(.l = list_women_19_p, .f = hits_19))
+shoothing_pursuit_women <- shoothing_pursuit_women[shoothing_pursuit_women$shots_19==19,]
+shoothing_pursuit_men <- shoothing_pursuit_men[shoothing_pursuit_men$shots_19==19,]
+
+shoothing_mass_start_men <- df_shooting_men[df_shooting_men$race_type == 'Mass start',]
+shoothing_mass_start_women <- df_shooting_women[df_shooting_women$race_type == 'Mass start',]
+shoothing_mass_start_men$last_shot <- sapply(X = shoothing_mass_start_men$Shooting.4, FUN = last_shot)
+shoothing_mass_start_women$last_shot <- sapply(X = shoothing_mass_start_women$Shooting.4, 
+                                               FUN = last_shot)
+
+
+
+list_men_19_m <- list(shooting1 = shoothing_mass_start_men$Shooting.1,
+                    shooting2 = shoothing_mass_start_men$Shooting.2,
+                    shooting3 = shoothing_mass_start_men$Shooting.3,
+                    shooting4 = shoothing_mass_start_men$Shooting.4)
+
+list_women_19_m <- list(shooting1 = shoothing_mass_start_women$Shooting.1,
+                    shooting2 = shoothing_mass_start_women$Shooting.2,
+                    shooting3 = shoothing_mass_start_women$Shooting.3,
+                    shooting4 = shoothing_mass_start_women$Shooting.4)
+
+shoothing_mass_start_men$shots_19 <- unlist(pmap(.l = list_men_19_m, .f = hits_19))
+shoothing_mass_start_women$shots_19 <- unlist(pmap(.l = list_women_19_m, .f = hits_19))
+shoothing_mass_start_women <- shoothing_mass_start_women[shoothing_mass_start_women$shots_19==19,]
+shoothing_mass_start_men <- shoothing_mass_start_men[shoothing_mass_start_men$shots_19==19,]
+
+
+df_pressure_m <- rbind(shoothing_pursuit_men, shoothing_mass_start_men)
+df_pressure_w <- rbind(shoothing_pursuit_women, shoothing_mass_start_women)
+```
+
+
+
+
+```{r}
+# The hits and the misses of the 20-th target for individuals and then for pursuits and mass starts
+y_ind_m <- length(under_pressure_men$last_shot[under_pressure_men$last_shot=='Hit'])
+y_ind_w <- length(under_pressure_women$last_shot[under_pressure_women$last_shot=='Hit'])
+n_ind_m <- nrow(under_pressure_men)
+n_ind_w <- nrow(under_pressure_women)
+
+y_oth_m <- length(df_pressure_m$last_shot[df_pressure_m$last_shot=='Hit'])
+y_oth_w <- length(df_pressure_w$last_shot[df_pressure_w$last_shot=='Hit'])
+n_oth_m <- nrow(df_pressure_m)
+n_oth_w <- nrow(df_pressure_w)
+```
+
+
+
+```{r}
+# The posterior parameters for individuals
+alpha_post_ind_m <- alpha_prior_men + y_ind_m
+alpha_post_ind_w <- alpha_prior_women + y_ind_m
+beta_post_ind_m <- alpha_prior_men + n_ind_m - y_ind_m
+beta_post_ind_w <- alpha_prior_women + n_ind_w - y_ind_w
+
+# Probability of hitting the 20-th shot in residuals and mass starts
+threshold_m <- y_oth_m/n_oth_m
+threshold_w <- y_oth_w/n_oth_w
+```
+
+We restate that the Null hypothesis $H_0$ is that in individuals, the very last shot has a probability of being hit (when hitting the first 19), that is greater or equal the other race formats .
+
+
+
+```{r}
+# Hypothesis testing for men
+x_axis <- seq(0, 1, 0.001)
+plot <- ggplot() +
+        geom_line(aes(x=x_axis, y=dbeta(x = x_axis, shape1 = alpha_post_ind_m,
+                                        shape2 = beta_post_ind_m))) +
+        geom_vline(aes(xintercept=threshold_m)) +
+        theme_bw()
+plot
+```
+
+
+```{r}
+# Integrating the null hypothesis for men
+int_func_m <- function(x){
+  return(dbeta(x = x, shape1 = alpha_post_ind_m,
+                                        shape2 = beta_post_ind_m))
+}
+integrate(f = int_func_m, lower = threshold_m, upper=1)$value
+```
+
+Using a significance level of $ 1\%$ we can reject the Null hypothesis with a $99\%$ probabilty and state that the last shot in individual races is really more troublesome then in every other race format and that the pressure of loosing a whole minute is the decider in the performance.
+
+
+
+```{r}
+# Integrating the null hypothesis for women
+x_axis <- seq(0, 1, 0.001)
+plot <- ggplot() +
+        geom_line(aes(x=x_axis, y=dbeta(x = x_axis, shape1 = alpha_post_ind_w,
+                                        shape2 = beta_post_ind_w))) +
+        geom_vline(aes(xintercept=threshold_w)) +
+        theme_bw()
+plot
+```
+
+
+
+```{r}
+int_func_w <- function(x){
+  return(dbeta(x = x, shape1 = alpha_post_ind_w,
+                                        shape2 = beta_post_ind_w))
+}
+integrate(f = int_func_w, lower = threshold_w, upper=1)$value
+```
+
+
+In the women's case the outcome is even more pronounced as we could reject the Null hypothesis also with $99.5%$ probability.
+We don't even imagine the feelings during the breath that leads to the release of the last shot that can decide a whole race or even a whole career.
+
+
