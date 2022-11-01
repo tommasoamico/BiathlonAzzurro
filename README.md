@@ -18,3 +18,6 @@ When establishing the effectiveness of a vaccine a farmaceutical company prepare
 What we do is to take into consideration the standings entering the last shooting range. We considered pressured situations the ones were the athlete enters the range in the top 10 while all the other positions are considered without pressure.
 What we want to establish is if pressure has some kind of effect on each single athlete. In order to do that we consider top 10 shots as the vaccine samples while the outside of the top 10 ones are considered placebo, after a binomial analysis we determine the effect of pressure on each single athlete.
 
+- **Win Probability Predictor**
+In this project we develop a win probability predictor. The algorithm is able to output the probability of a biathelete to conclude the current race in a podium position, to win the race or to finsh after the 3rd position.<br>
+After trying out some Deep Learning models the choice for the final algorithm turned in a 2 horse race between a **Random Forest** model and a **XGBoost** classifier. The winner has been chosen to be the Random Forest for various reasons that are summed up in the notebook. From the confusion matrix we plot we can see how the model has, given the framework, a performance the exceeded our expectations.
