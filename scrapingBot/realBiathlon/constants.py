@@ -1,0 +1,1 @@
+mainUrl = 'https://www.realbiathlon.com'
