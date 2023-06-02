@@ -19,11 +19,6 @@ with mySqlObject() as connection:
 
     connection.useDatabase('biathlon')
 
-    for row in pd.read_csv(pathCsv).values.tolist():
-        if isinstance(row[2], float):
-            command = f"""INSERT INTO {tableName} ({', '.join(columnNames)})
-        VALUES ("{row[0]}","{row[1]}",NULL,(SELECT alpha3 FROM nation WHERE alpha2 = '{row[3]}'), '{row[4]}', (SELECT idNation FROM nation n WHERE n.alpha2 = '{row[3]}'))"""
-        else:
-            command = f"""INSERT INTO {tableName} ({', '.join(columnNames)})
-        VALUES ("{row[0]}","{row[1]}",'{row[2]}',(SELECT alpha3 FROM nation WHERE alpha2 = '{row[3]}'), '{row[4]}', (SELECT idNation FROM nation n WHERE n.alpha2 = '{row[3]}'))"""
-        connection.executeAndCommit(command)
+    result = connection.executeAndFetch(
+        f'SELECT idAthlete FROM Athlete WHERE firstName = "Lene Berg" AND lastName = "AADLANDSVIK" AND nationAlpha3 = "NOR" AND birthday ="1993-01-09";')
+    print(result)

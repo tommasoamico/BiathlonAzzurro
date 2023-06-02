@@ -18,6 +18,6 @@ class results(webdriver.Chrome):
         options.add_experimental_option("detach", True)
         os.environ['PATH'] += self.driverPath
 
-        super(RESULTS, self).__init__(options=options)
+        super(results, self).__init__(options=options)
         self.implicitly_wait(15)
         self.maximize_window()

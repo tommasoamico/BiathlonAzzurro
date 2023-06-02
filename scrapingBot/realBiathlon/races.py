@@ -1,17 +1,43 @@
-from typing import List
+from typing import List, Type, Tuple
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.remote.webelement import WebElement
 from realBiathlon.constants import mainUrl
 import os
 import time
+import re
+import numpy as np
+from datetime import datetime
+from realBiathlon.mySql import mySqlObject
+from itertools import repeat
+import pandas as pd
+from realBiathlon.raceResults import retrieveRaceResults
 
 
 class races(webdriver.Chrome):
-    def __init__(self, driverPath: str = r'/Users/tommaso/Workspace/seleniumDrivers/chromedriver_mac64',
+    all: List[Type] = []
+
+    def __init__(self, year: int, level: str, driverPath: str = r'/Users/tommaso/Workspace/seleniumDrivers/chromedriver_mac64',
                  teardown: bool = False) -> None:
-        self.driverPath = driverPath
-        self.teardown = teardown
+        assert isinstance(year, int), 'Year must be an integer'
+        assert level in [
+            'World', 'IBU', 'Y/J'], 'level argument must be either World, IBU or Y/J'
+        self.year: int = year
+        pattern = re.compile('^[0-9]{4}')
+        minimum: int = 1958
+        # If post may we add a year
+        maximum: int = round((datetime.now().month + 2) / 12, 0) + self.year
+        assert pattern.search(str(
+            year)), 'The year must be an integer number of length 4 pointing to the year in which the season ends, minimum is 1958'
+        assert np.logical_and(
+            year > minimum, year < maximum), f"Year must be between {minimum} and {maximum}"
+        self.driverPath: str = driverPath
+        self.teardown: bool = teardown
+
+        self.levelDict = {'World': 1, 'IBU': 2, 'Youth': 3}
+        self.level = level
+        self.yearDataBase = f'{self.year - 1}-{str(self.year)[-2:]}'
         options = webdriver.ChromeOptions()
         options.add_experimental_option("detach", True)
         os.environ['PATH'] += self.driverPath
@@ -41,3 +67,125 @@ class races(webdriver.Chrome):
             By.ID,
             'select2-years-container')
         yearDropdown.click()
+        time.sleep(.5)
+        ulElement = self.find_element(By.ID,
+                                      'select2-years-results')
+        liElements = ulElement.find_elements(
+            By.CSS_SELECTOR, 'li[role="option"]')
+
+        return [element.get_property("id") for element in liElements]
+
+    def selectYear(self) -> None:
+
+        rightIdList: List[str] = list(
+            filter(lambda x: str(self.year) in x, self.__getAllYears()))
+        assert len(
+            rightIdList) == 1, 'The filtering didn\'t bring to a unique result'
+
+        yearDropdown: WebElement = self.find_element(By.ID,
+                                                     rightIdList[0])
+
+        yearDropdown.click()
+
+    def selectLevel(self) -> None:
+
+        time.sleep(.5)
+        levelButton: WebElement = self.find_element(By.ID,
+                                                    f'{self.levelDict[self.level]}button')
+        levelButton.click()
+
+    def selectGender(self, gender: str) -> None:
+        time.sleep(.5)
+        assert gender == "W" or gender == "M", 'Gender must be one of M or W'
+
+        genderButton = self.find_element(
+            By.ID,
+            gender + 'button')
+
+        genderButton.click()
+
+    def __idStageQuery(self, locations: List[str], eventNumbers: List[str]) -> List[int]:
+        nObjects: int = len(locations)
+        # print([(level, location, season, eventNumber)
+        #      for level, location, season, eventNumber in zip(repeat(self.level, nObjects), locations, repeat(self.yearDataBase, nObjects), eventNumbers)])
+        parameters = [(level, location, season, eventNumber)
+                      for level, location, season, eventNumber in zip(repeat(self.level, nObjects), locations, repeat(self.yearDataBase, nObjects), eventNumbers)]
+
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+
+            query = "SELECT idStage FROM stage WHERE level = '%s' AND location = '%s' AND season = '%s' AND eventNumber = '%s'"
+            results = []
+            for parameter in parameters:
+                connection.dbc.execute(query % parameter)
+                result = connection.dbc.fetchall()[0]
+                assert len(
+                    result) == 1, "The query did not get an unique result"
+                results.append(result[0])
+
+            return results
+
+    def __getHeaders(self) -> List[WebElement]:
+        stageHeadersElement: List[WebElement] = self.find_elements(
+            By.CSS_SELECTOR, 'h4[id = "content"]')
+
+        return stageHeadersElement
+
+    def __getTables(self) -> List[WebElement]:
+        tablesElements: List[WebElement] = self.find_elements(
+            By.CSS_SELECTOR, 'table[id = "thistable"]')
+
+        return tablesElements
+
+    def __idStatusRaceQuery(self, stageIterables: list, dates: List[str], descriptions: List[Tuple[str]]):
+        query = "SELECT idRace, status FROM race WHERE idStage = '%s' AND date = '%s' AND description = '%s'"
+
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            results = []
+            for stage, date, description in zip(stageIterables, dates, descriptions):
+                result = connection.executeAndFetch(
+                    query % (stage, date, description))[0]
+                assert len(
+                    result) == 2, "The query did not get an unique result"
+                results.append(result)
+            return results
+
+    def findAllStagesAndRaces(self) -> Tuple[List[int], List[WebElement]]:
+        time.sleep(3)
+        stageHeadersElement = self.__getHeaders()
+        allHeaders = [header.text for header in stageHeadersElement]
+        allLocations = list(map(lambda x: x.split('(')[0].strip(), allHeaders))
+        allEventNumbers = list(map(lambda x: x.split(' ')[-1], allHeaders))
+        allIds: List[int] = self.__idStageQuery(
+            locations=allLocations, eventNumbers=allEventNumbers)
+        allTables = self.__getTables()
+        assert len(allTables) == len(
+            allHeaders), 'Stages and Tables did not match'
+        allTablesWithTag = list(
+            map(lambda x: '<table>' + x.get_attribute('innerHTML') + '</table>', allTables))
+        allDf = list(map(lambda x: pd.read_html(x)[0], allTablesWithTag))
+        lenStages = list(map(lambda x: len(x), allDf))
+        stageRaceDict: dict = {}
+        allDescriptions = list(map(lambda x: list(x['Description']), allDf))
+        allDates = list(map(lambda x: list(x['Date']), allDf))
+        stagesIdIterables = list(
+            map(lambda x, y: repeat(x, y), allIds, lenStages))
+
+        for i, (stageIterables, dates, descriptions) in enumerate(zip(stagesIdIterables, allDates, allDescriptions)):
+            stageRaceDict[allIds[i]] = self.__idStatusRaceQuery(
+                stageIterables=stageIterables, dates=dates, descriptions=descriptions)
+        # To filter non final races
+
+    def clickRace(self, stagePosition: int, racePosition: int) -> None:
+        allTables: List[WebElement] = self.__getTables()
+        myTable: WebElement = allTables[stagePosition]
+        cilckableElements: List[WebElement] = myTable.find_elements(
+            By.TAG_NAME, "tr")
+        cilckableElements[racePosition + 1].click()  # header has a tr
+
+    def getRaceResult(self) -> Type[retrieveRaceResults]:
+        return retrieveRaceResults(self)
+
+        # mySql.executeAndFetch()
+# Insert the cancelled status case

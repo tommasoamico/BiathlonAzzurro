@@ -97,7 +97,7 @@ class athletes(webdriver.Chrome):
     def selectSingleOption(self) -> None:
         self.find_element(By.CSS_SELECTOR, 'li[role="option"]').click()
 
-    def findBirthday(self) -> str:
+    def findBirthday(self) -> List[str]:
         divBirthday = self.find_element(By.ID, 'pagesubheaderright')
         birthday = re.findall(r'\d{4}-\d{2}-\d{2}', divBirthday.text)
         return birthday

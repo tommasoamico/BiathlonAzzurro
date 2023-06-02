@@ -32,6 +32,11 @@ class mySqlObject:
     def executeCommand(self, command: str) -> None:
         self.dbc.execute(command)
 
+    def executeAndFetch(self, command: str) -> None:
+        self.dbc.execute(command)
+        result = self.dbc.fetchall()
+        return result
+
     def executeAndCommit(self, command: str) -> None:
         self.dbc.execute(command)
         self.db.commit()
