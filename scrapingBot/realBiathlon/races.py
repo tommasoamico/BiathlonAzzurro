@@ -13,6 +13,9 @@ from realBiathlon.mySql import mySqlObject
 from itertools import repeat
 import pandas as pd
 from realBiathlon.raceResults import retrieveRaceResults
+from realBiathlon.loopTimes import getLoopTimes
+from realBiathlon.shooting import getShooting
+from realBiathlon.analysis import analysisHandle
 
 
 class races(webdriver.Chrome):
@@ -151,7 +154,7 @@ class races(webdriver.Chrome):
                 results.append(result)
             return results
 
-    def findAllStagesAndRaces(self) -> Tuple[List[int], List[WebElement]]:
+    def findAllStagesAndRaces(self) -> dict:
         time.sleep(3)
         stageHeadersElement = self.__getHeaders()
         allHeaders = [header.text for header in stageHeadersElement]
@@ -175,7 +178,7 @@ class races(webdriver.Chrome):
         for i, (stageIterables, dates, descriptions) in enumerate(zip(stagesIdIterables, allDates, allDescriptions)):
             stageRaceDict[allIds[i]] = self.__idStatusRaceQuery(
                 stageIterables=stageIterables, dates=dates, descriptions=descriptions)
-        # To filter non final races
+        return stageRaceDict
 
     def clickRace(self, stagePosition: int, racePosition: int) -> None:
         allTables: List[WebElement] = self.__getTables()
@@ -184,8 +187,56 @@ class races(webdriver.Chrome):
             By.TAG_NAME, "tr")
         cilckableElements[racePosition + 1].click()  # header has a tr
 
-    def getRaceResult(self) -> Type[retrieveRaceResults]:
-        return retrieveRaceResults(self)
+    def getAllClickableSections(self) -> List[str]:
+        divElement: WebElement = self.find_element(
+            By.CSS_SELECTOR, 'div[id = "cat"]')
+        allOptions: List[WebElement] = divElement.find_elements(
+            By.TAG_NAME, 'label')
+        time.sleep(1)
+        allOptionsText: List[str] = [option.text for option in allOptions]
+        assert np.all([option != '' for option in allOptionsText]
+                      ), "Options html did not load"
 
+        return allOptionsText
+
+    def getRaceResult(self, raceId: int) -> Type[retrieveRaceResults]:
+        return retrieveRaceResults(self, raceId=raceId)
+
+    def getRaceStatus(self, raceId: int) -> str:
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            status = connection.executeAndFetch(
+                f'SELECT status FROM biathlon.race WHERE idRace = {raceId};')
+            assert len(status) == 1, "The query did not provide a unique result"
+            return status[0][0]
+
+    def getRaceInsertStatus(self, raceId: int) -> str:
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            insertStatus = connection.executeAndFetch(
+                f'SELECT insertStatus FROM biathlon.race WHERE idRace = {raceId};')
+            assert len(
+                insertStatus) == 1, "The query did not provide a unique result"
+            return insertStatus[0][0]
+
+    def adjustStatus(self, raceId: int, statusRealBiathlon: str) -> None:
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            connection.executeAndCommit(
+                f'UPDATE race SET status = "{statusRealBiathlon}" WHERE idRace = {raceId}')
+
+    def insertIntoTableDf(self, tableName: str, df: pd.DataFrame) -> None:
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            connection.insertFromDf(tableName=tableName, df=df)
+
+    def getLoopTimes(self, raceId: int) -> Type[getLoopTimes]:
+        return getLoopTimes(driver=self, raceId=raceId)
+
+    def getShootingResults(self, raceId: int) -> Type[getShooting]:
+        return getShooting(driver=self, idRace=raceId)
+
+    def getAnalysis(self, raceId: int) -> Type[analysisHandle]:
+        return analysisHandle(driver=self, raceId=raceId)
         # mySql.executeAndFetch()
 # Insert the cancelled status case

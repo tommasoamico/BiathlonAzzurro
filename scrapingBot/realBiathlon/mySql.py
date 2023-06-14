@@ -32,7 +32,7 @@ class mySqlObject:
     def executeCommand(self, command: str) -> None:
         self.dbc.execute(command)
 
-    def executeAndFetch(self, command: str) -> None:
+    def executeAndFetch(self, command: str):
         self.dbc.execute(command)
         result = self.dbc.fetchall()
         return result
@@ -51,11 +51,19 @@ class mySqlObject:
 
         insertCommand = f"INSERT INTO {tableName} ({', '.join(columnNames)}) VALUES ({', '.join(['%s']*len(columnNames))})"
 
-        rowLists: List[Tuple] = pd.read_csv(csvPath, keep_default_na=False, na_values=[
-                                            'NULL', 'NAN', 'nan']).values.tolist()
+        rowLists: List[list] = pd.read_csv(csvPath, keep_default_na=False, na_values=[
+            'NULL', 'NAN', 'nan']).values.tolist()
 
         self.dbc.executemany(insertCommand, rowLists)
 
+        self.db.commit()
+
+    def insertFromDf(self, tableName: str, df: pd.DataFrame):
+        columnNames = list(df.columns)
+        insertCommand = f"INSERT INTO {tableName} ({', '.join(columnNames)}) VALUES ({', '.join(['%s']*len(columnNames))})"
+        rowLists: List[list] = df.values.tolist()
+        print(insertCommand)
+        self.dbc.executemany(insertCommand, rowLists)
         self.db.commit()
 
         # self.executeCommand(insertCommand)

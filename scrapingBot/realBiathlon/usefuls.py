@@ -1,6 +1,7 @@
 from typing import Iterable, List, Tuple
 import csv
 import numpy as np
+import pandas as pd
 
 
 def selectSurname(athlete: str) -> str:
@@ -29,3 +30,23 @@ def selectNameSurname(fullName: str) -> Tuple[str]:
     firstName = ' '.join(arrayFullName[~mask])
     lastName = ' '.join(arrayFullName[~mask])
     return firstName, lastName
+
+
+def makeColumnTime(columnName: str, df: pd.DataFrame) -> pd.Series:
+    newColumn: pd.Series = df[columnName].apply(
+        lambda x: '00:' + x if isinstance(x, str) and x.count(':') == 1 else x)
+    return newColumn
+
+
+def makeStringCamelCase(string: str) -> str:
+    string = string.replace('%', 'Percentage')
+    splittedString: List[str] = string.split(' ')
+    dromedaryWord: str = splittedString[0]
+    camelWords: List[str] = splittedString[1:]
+    if dromedaryWord[0].isupper():
+        splittedString[0] = dromedaryWord[0].lower() + dromedaryWord[1:]
+    for i, camelWord in enumerate(camelWords):
+        if camelWord[0].islower():
+            splittedString[i + 1] = camelWord.capitalize()
+    finalColumnName = ''.join(splittedString)
+    return finalColumnName
