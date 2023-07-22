@@ -14,8 +14,16 @@ from itertools import repeat
 import pandas as pd
 from realBiathlon.raceResults import retrieveRaceResults
 from realBiathlon.loopTimes import getLoopTimes
+from realBiathlon.loopTimesRelay import getLoopTimesRelay
 from realBiathlon.shooting import getShooting
+from realBiathlon.shootingRelay import getShootingRelay
 from realBiathlon.analysis import analysisHandle
+from realBiathlon.analysisRelay import analysisHandleRelay
+from realBiathlon.splitTimesRelay import splitTimesHandleRelay
+from realBiathlon.splitTimes import splitTimesHandle
+from realBiathlon.metadata import metadataHandle
+#from realBiathlon.metadataRelay import metadataHandleRelay
+from typeguard import typechecked
 
 
 class races(webdriver.Chrome):
@@ -135,9 +143,9 @@ class races(webdriver.Chrome):
         return stageHeadersElement
 
     def __getTables(self) -> List[WebElement]:
+        time.sleep(1)
         tablesElements: List[WebElement] = self.find_elements(
             By.CSS_SELECTOR, 'table[id = "thistable"]')
-
         return tablesElements
 
     def __idStatusRaceQuery(self, stageIterables: list, dates: List[str], descriptions: List[Tuple[str]]):
@@ -183,9 +191,16 @@ class races(webdriver.Chrome):
     def clickRace(self, stagePosition: int, racePosition: int) -> None:
         allTables: List[WebElement] = self.__getTables()
         myTable: WebElement = allTables[stagePosition]
-        cilckableElements: List[WebElement] = myTable.find_elements(
+        cilckablRaces: List[WebElement] = myTable.find_elements(
             By.TAG_NAME, "tr")
-        cilckableElements[racePosition + 1].click()  # header has a tr
+        race: WebElement = cilckablRaces[racePosition + 1].find_element(
+            By.CSS_SELECTOR, 'td[data-th="status"]')
+
+        race.click()
+
+        # cilckablRaces[racePosition + 1].click()  # header has a tr
+
+        # print(len(cilckableElements))
 
     def getAllClickableSections(self) -> List[str]:
         divElement: WebElement = self.find_element(
@@ -230,13 +245,52 @@ class races(webdriver.Chrome):
             connection.useDatabase('biathlon')
             connection.insertFromDf(tableName=tableName, df=df)
 
+    @staticmethod
+    def setInstertState(raceId: int) -> None:
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            connection.executeAndCommit(
+                f'UPDATE race SET insertStatus = "inserted" WHERE (idRace = {raceId});')
+
+    @staticmethod
+    @typechecked
+    def getGeneraCategory(raceId: int) -> str:
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            generalCategory: List[Tuple[str]] = connection.executeAndFetch(
+                f"SELECT generalCategory FROM biathlon.race WHERE idRace = {raceId}")
+        assert len(
+            generalCategory) == 1, "General Category query did not provide a unique result"
+        return generalCategory[0][0]
+
     def getLoopTimes(self, raceId: int) -> Type[getLoopTimes]:
         return getLoopTimes(driver=self, raceId=raceId)
+
+    def getLoopTimesRelay(self, raceId: int) -> Type[getLoopTimesRelay]:
+        return getLoopTimesRelay(driver=self, raceId=raceId)
 
     def getShootingResults(self, raceId: int) -> Type[getShooting]:
         return getShooting(driver=self, idRace=raceId)
 
+    def getShootingResultsRelay(self, raceId: int) -> Type[getShootingRelay]:
+        return getShootingRelay(driver=self, idRace=raceId)
+
     def getAnalysis(self, raceId: int) -> Type[analysisHandle]:
         return analysisHandle(driver=self, raceId=raceId)
-        # mySql.executeAndFetch()
+
+    def getAnalysisRelay(self, raceId: int) -> Type[analysisHandleRelay]:
+        return analysisHandleRelay(driver=self, raceId=raceId)
+
+    def getSplitTimes(self, raceId) -> Type[splitTimesHandle]:
+        return splitTimesHandle(driver=self, raceId=raceId)
+
+    def getSplitTimesRelay(self, raceId) -> Type[splitTimesHandleRelay]:
+        return splitTimesHandleRelay(driver=self, raceId=raceId)
+
+    def getMetadata(self, raceId) -> Type[metadataHandle]:
+        return metadataHandle(driver=self, raceId=raceId)
+
+    # def getMetadataRelay(self, raceId) -> Type[metadataHandleRelay]:
+    #    return metadataHandleRelay(driver=self, raceId=raceId)
+
 # Insert the cancelled status case

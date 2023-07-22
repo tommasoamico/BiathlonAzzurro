@@ -2,6 +2,9 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.by import By
 from realBiathlon.loopTimes import getLoopTimes
+from realBiathlon.loopTimesRelay import getLoopTimesRelay
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from realBiathlon.constants import nTargets
 from typing import List
 import pandas as pd
@@ -17,11 +20,14 @@ class getShooting:
         self.idRace = idRace
 
     def goToShooting(self) -> None:
-        shootingButton: WebElement = self.drvr.find_element(By.ID, 'shootingB')
+
+        shootingButton = WebDriverWait(self.drvr, 10).until(
+            EC.presence_of_element_located((By.ID, 'shootingB')))
+
         shootingButton.click()
 
     @staticmethod
-    def __manouverRepeatedColumns(df: pd.DataFrame) -> List[str]:
+    def manouverRepeatedColumns(df: pd.DataFrame) -> List[str]:
         repeatedColumns: List[str] = list(map(lambda x: x.split(
             '.')[0], filter(lambda x: '.' in x, df.columns)))
 
@@ -40,7 +46,7 @@ class getShooting:
         return newColumns
 
     @staticmethod
-    def __timeShootings(columnString: str, valueToReturn: int) -> List[str]:
+    def timeShootings(columnString: str, valueToReturn: int) -> List[str]:
         timeValues: List[str] = columnString.split(' ')[:-1]
         assert all(
             list(map(lambda x: x[-1] == 's', timeValues))), "Not all second values"
@@ -49,7 +55,7 @@ class getShooting:
         return timeValuesIsDigit[valueToReturn]
 
     @staticmethod
-    def __decideStarting(orderString: str) -> str:
+    def decideStarting(orderString: str) -> str:
 
         if '1' not in orderString and np.all([str(i) in orderString for i in range(2, 6)]):
 
@@ -85,7 +91,7 @@ class getShooting:
             idAthletes), "Loop dataframe and athlete ids did not match"
         dfShooting: pd.DataFrame = dfShooting.drop(
             columns=['Rank', 'Bib', 'Family\xa0Name', 'Given Name', 'Nation'])
-        dfShooting.columns: List[str] = self.__manouverRepeatedColumns(
+        dfShooting.columns: List[str] = self.manouverRepeatedColumns(
             dfShooting)
         shootingColumns = list(
             filter(lambda x: 'Shooting' in x, dfShooting.columns))
@@ -94,9 +100,9 @@ class getShooting:
             dfShooting[f'shootingOrder{column[-1]}']: pd.Series = dfShooting.apply(lambda x: x[column].split(
                 ' ')[-1] if isinstance(x[column], str) else None, axis=1)
             dfShooting[f'shooting{column[-1]}StartedFrom']: pd.Series = dfShooting.apply(
-                lambda x: self.__decideStarting(x[f'shootingOrder{column[-1]}']) if isinstance(x[f'shootingOrder{column[-1]}'], str) else None, axis=1)
+                lambda x: self.decideStarting(x[f'shootingOrder{column[-1]}']) if isinstance(x[f'shootingOrder{column[-1]}'], str) else None, axis=1)
             for target in range(nTargets):
-                dfShooting[f'time{column[-1]}Target{target + 1}']: pd.Series = dfShooting.apply(lambda x: self.__timeShootings(
+                dfShooting[f'time{column[-1]}Target{target + 1}']: pd.Series = dfShooting.apply(lambda x: self.timeShootings(
                     x[column], target) if isinstance(x[column], str) else None, axis=1)
 
             dfShooting: pd.DataFrame = dfShooting.drop(columns=[column])
@@ -114,5 +120,12 @@ class getShooting:
 
             filteredDf = filteredDf.rename(
                 columns={'Lane': 'lane', 'Time': 'shootingTime'})
+
+            timeColumns: List[str] = [
+                'shootingTime'] + list(filter(lambda x: 'timeTarget' in x, filteredDf.columns))
+
+            for column in timeColumns:
+                filteredDf[column] = getLoopTimes.handleTimeColumn(
+                    columnName=column, df=filteredDf)
 
             yield filteredDf

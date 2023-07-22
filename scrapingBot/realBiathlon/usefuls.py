@@ -2,6 +2,7 @@ from typing import Iterable, List, Tuple
 import csv
 import numpy as np
 import pandas as pd
+from typeguard import typechecked
 
 
 def selectSurname(athlete: str) -> str:
@@ -39,7 +40,8 @@ def makeColumnTime(columnName: str, df: pd.DataFrame) -> pd.Series:
 
 
 def makeStringCamelCase(string: str) -> str:
-    string = string.replace('%', 'Percentage')
+    string: str = string.replace('%', 'Percentage').replace('°', '').replace(
+        '(', '').replace(')', '').replace('/', '').replace('+', 'And').replace('.', '')
     splittedString: List[str] = string.split(' ')
     dromedaryWord: str = splittedString[0]
     camelWords: List[str] = splittedString[1:]

@@ -5,7 +5,7 @@ import glob
 import numpy as np
 from functools import reduce
 from mysql.connector.connection import MySQLConnection
-from typing import Iterable, List, Tuple, Union
+from typing import Iterable, List, Tuple, Union, Any
 import csv
 from realBiathlon.usefuls import tail
 
@@ -32,7 +32,7 @@ class mySqlObject:
     def executeCommand(self, command: str) -> None:
         self.dbc.execute(command)
 
-    def executeAndFetch(self, command: str):
+    def executeAndFetch(self, command: str) -> Any:
         self.dbc.execute(command)
         result = self.dbc.fetchall()
         return result

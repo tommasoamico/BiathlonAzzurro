@@ -3,7 +3,9 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from typing import List, Tuple
 from selenium.webdriver.common.by import By
 from realBiathlon.mySql import mySqlObject
-
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 from pprint import pprint
 import pandas as pd
 
@@ -29,7 +31,9 @@ class getLoopTimes:
             loopElements) if i not in noLoopIndexes]
         return filteredLoopElements, filteredLoopsText
 
-    def clickLoop(self, loopElement: WebElement) -> None:
+    @staticmethod
+    def clickElement(loopElement: WebElement) -> None:
+        time.sleep(.6)
         loopElement.click()
 
     def switchToAbsoluteTimes(self) -> None:
@@ -46,7 +50,8 @@ class getLoopTimes:
 
         filteredidAndRank: List[Tuple[int, str]] = list(filter(
             lambda x: isinstance(x[1], int), idAndRank))
-        idAthletes = list(map(lambda x: x[0], filteredidAndRank))
+        idAthletes: List[Tuple[int, str]] = list(
+            map(lambda x: x[0], filteredidAndRank))
         return idAthletes
 
     @staticmethod
@@ -73,8 +78,7 @@ class getLoopTimes:
         for column in dfLoop.columns:
             dfLoop[column] = self.handleTimeColumn(
                 columnName=column, df=dfLoop)
-        dfLoop['idRace'] = [self.raceId] * len(dfLoop)
-        dfLoop['loopNumber'] = [loopNumber] * len(dfLoop)
+        dfLoop['idRace'] = self.raceId
 
         dfLoop['idAthlete'] = idAthletes
         dfLoop['loopNumber'] = loopNumber
