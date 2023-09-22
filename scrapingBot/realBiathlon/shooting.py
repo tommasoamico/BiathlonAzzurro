@@ -12,6 +12,10 @@ from pprint import pprint
 import numpy as np
 import re
 from typing import Generator
+import logging
+
+logging.basicConfig(filename='bot.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 
 class getShooting:
@@ -47,12 +51,18 @@ class getShooting:
 
     @staticmethod
     def timeShootings(columnString: str, valueToReturn: int) -> List[str]:
+
         timeValues: List[str] = columnString.split(' ')[:-1]
         assert all(
             list(map(lambda x: x[-1] == 's', timeValues))), "Not all second values"
-        timeValuesIsDigit: List[str] = list(map(lambda x: x[:-1], timeValues))
 
-        return timeValuesIsDigit[valueToReturn]
+        try:
+            timeValuesIsDigit: List[str] = list(
+                map(lambda x: x[:-1], timeValues))
+
+            return timeValuesIsDigit[valueToReturn]
+        except IndexError:
+            return None
 
     @staticmethod
     def decideStarting(orderString: str) -> str:
@@ -87,6 +97,7 @@ class getShooting:
             By.ID, 'thistable').get_attribute('innerHTML')
         dfShooting: pd.DataFrame = pd.read_html(
             '<table>' + tableHtml + '</table>')[0]
+
         assert len(dfShooting) == len(
             idAthletes), "Loop dataframe and athlete ids did not match"
         dfShooting: pd.DataFrame = dfShooting.drop(
@@ -101,6 +112,7 @@ class getShooting:
                 ' ')[-1] if isinstance(x[column], str) else None, axis=1)
             dfShooting[f'shooting{column[-1]}StartedFrom']: pd.Series = dfShooting.apply(
                 lambda x: self.decideStarting(x[f'shootingOrder{column[-1]}']) if isinstance(x[f'shootingOrder{column[-1]}'], str) else None, axis=1)
+            pprint(dfShooting)
             for target in range(nTargets):
                 dfShooting[f'time{column[-1]}Target{target + 1}']: pd.Series = dfShooting.apply(lambda x: self.timeShootings(
                     x[column], target) if isinstance(x[column], str) else None, axis=1)

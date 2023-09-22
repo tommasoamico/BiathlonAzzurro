@@ -19,6 +19,10 @@ import re
 class getShootingRelay(getShooting):
     def __init__(self, driver: WebDriver, idRace: int) -> None:
         super().__init__(driver, idRace)
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            self.raceDescription: str = connection.executeAndFetch(
+                f"SELECT description FROM race WHERE idRace='{idRace}';")[0][0]
 
     @typechecked
     def getAllAthleteFields(self) -> Tuple[List[WebElement], List[str]]:
@@ -52,8 +56,10 @@ class getShootingRelay(getShooting):
 
         # if text == 'Σ':
         athletesId: List[int] = getLoopTimesRelay.getAthletesRelayId(
-            idRace=self.idRace, athleteNumber='Σ')
-        assert len(athletesId) == len(dfShootingRelay)
+            idRace=self.idRace, athleteNumber='Σ', raceDescription=self.raceDescription)
+        # print()
+        assert len(athletesId) == len(
+            dfShootingRelay), "Number of athletes id and length of dataframes differ"
         # else:
         #   athletesId: List[int] = getLoopTimesRelay.getAthletesRelayId(
         #      idRace=self.idRace, athleteNumber=text)

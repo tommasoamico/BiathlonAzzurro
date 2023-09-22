@@ -22,14 +22,14 @@ from realBiathlon.analysisRelay import analysisHandleRelay
 from realBiathlon.splitTimesRelay import splitTimesHandleRelay
 from realBiathlon.splitTimes import splitTimesHandle
 from realBiathlon.metadata import metadataHandle
-#from realBiathlon.metadataRelay import metadataHandleRelay
+# from realBiathlon.metadataRelay import metadataHandleRelay
 from typeguard import typechecked
 
 
 class races(webdriver.Chrome):
     all: List[Type] = []
 
-    def __init__(self, year: int, level: str, driverPath: str = r'/Users/tommaso/Workspace/seleniumDrivers/chromedriver_mac64',
+    def __init__(self, year: int, level: str, driverPath: str = r'/Users/tommaso/Workspace/seleniumDrivers/chromedriver-mac-x64',
                  teardown: bool = False) -> None:
         assert isinstance(year, int), 'Year must be an integer'
         assert level in [

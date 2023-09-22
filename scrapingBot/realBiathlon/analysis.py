@@ -114,7 +114,8 @@ class analysisHandle:
 
         if np.all(list(map(lambda x: isinstance(x, float),
                            finalAnalysisDf['penaltyLoopAvgShooting']))):
-            pass
+            finalAnalysisDf['penaltyLoopAvgShooting'][finalAnalysisDf['penaltyLoopAvgShooting'] < 0] = None
+            timeColumns += ['penaltyLoopAvgShooting']
         elif np.any(list(map(lambda x: isinstance(x, str),
                              finalAnalysisDf['penaltyLoopAvgShooting']))):
             timeColumns += ['penaltyLoopAvgShooting']
@@ -124,5 +125,8 @@ class analysisHandle:
         for column in timeColumns:
             finalAnalysisDf[column] = getLoopTimes.handleTimeColumn(
                 columnName=column, df=finalAnalysisDf)
+
+        finalAnalysisDf = finalAnalysisDf[np.logical_not(
+            finalAnalysisDf['courseTimeRankCourseTime'] == 'LAP')]
 
         return finalAnalysisDf

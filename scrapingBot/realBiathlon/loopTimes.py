@@ -48,16 +48,47 @@ class getLoopTimes:
             idAndRank: List[Tuple[int, str]] = connection.executeAndFetch(
                 f"SELECT idAthlete, finalRank FROM raceResults WHERE idRace = {idRace} ORDER BY finalRank;")
 
+        print(
+            f"SELECT idAthlete, finalRank FROM raceResults WHERE idRace = {idRace} ORDER BY finalRank;")
         filteredidAndRank: List[Tuple[int, str]] = list(filter(
             lambda x: isinstance(x[1], int), idAndRank))
+        filteredidAndRank
         idAthletes: List[Tuple[int, str]] = list(
             map(lambda x: x[0], filteredidAndRank))
+        print(idAthletes)
         return idAthletes
 
     @staticmethod
+    def convertStringToTime(timeStr: str):
+
+        if isinstance(timeStr, str) and timeStr.count(':') == 1:
+
+            timeStr = '00:' + timeStr
+
+            if float(timeStr.split(':')[-1]) >= 60:
+                seconds = float(timeStr.split(':')[-1]) - 1
+                timeStr = ':'.join(timeStr.split(
+                    ':')[:-1]) + ':' + str(seconds)
+
+                return timeStr
+            else:
+                return timeStr
+        else:
+
+            try:
+                if str(timeStr).count(':') == 0 and float(timeStr) >= 60:
+                    timeStr = str(59.9)
+            except (TypeError, ValueError):
+                pass
+
+            else:
+                return timeStr
+
+    @staticmethod
     def handleTimeColumn(columnName: str, df: pd.DataFrame) -> pd.Series:
-        newColumn: pd.Series = df[columnName].apply(
-            lambda x: '00:' + x if isinstance(x, str) and x.count(':') == 1 else x)
+
+        newColumn: pd.Series = df[columnName].apply(lambda x:
+                                                    getLoopTimes.convertStringToTime(x))
 
         return newColumn
 

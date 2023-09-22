@@ -18,6 +18,10 @@ from typeguard import typechecked
 from realBiathlon.usefuls import makeStringCamelCase
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import logging
+
+logging.basicConfig(filename='bot.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
 
 
 class retrieveRaceResults:
@@ -38,6 +42,8 @@ class retrieveRaceResults:
 
     @staticmethod
     def __idQuery(firstName: str, lastName: str, nation: str, birthday: str) -> int:
+        logging.info(
+            f'Issued query for {firstName} {lastName} of {nation}. Born in {birthday}')
         assert len(
             nation) == 3, "Nation in the Athlete table is in the alpha3 format"
         if birthday == '':
@@ -147,10 +153,13 @@ class retrieveRaceResults:
 
     @staticmethod
     def __processFinalRank(row: pd.Series) -> Tuple[str]:
-        if row.finalRank.isdigit():
+        try:
+            if row.finalRank.isdigit():
+                return row.finalRank, 'Finished'
+            else:
+                return None, row.finalRank
+        except AttributeError:
             return row.finalRank, 'Finished'
-        else:
-            return None, row.finalRank
 
     def getResultsTable(self) -> pd.DataFrame:
         table: WebElement = self.drvr.find_element(
@@ -158,6 +167,7 @@ class retrieveRaceResults:
         df: pd.DataFrame = pd.read_html(
             '<table>' + table.get_attribute('innerHTML') + '</table>')[0]
         lenTable: int = len(df)
+
         df['Family\xa0Name']: pd.Series = list(
             map(lambda x: x.upper(), df['Family\xa0Name']))
         allIds: List[int] = self.__getAthleteId(
@@ -326,7 +336,7 @@ class retrieveRaceResults:
                 lambda x: x.split(' ')[i] if isinstance(x, str) else None)
 
         athletesDf['alpha3'] = athletesDf['Nation'].apply(
-            lambda x: self.__getAlpha3(x))
+            lambda x: self.getAlpha3(x))
 
         athletesDf: pd.DataFrame = athletesDf.drop(
             columns=['Rank', 'Family\xa0Name', 'Given Name', 'Nation', 'Shootings'])

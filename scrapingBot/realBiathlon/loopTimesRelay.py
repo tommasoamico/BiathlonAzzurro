@@ -14,6 +14,10 @@ import pandas as pd
 class getLoopTimesRelay(getLoopTimes):
     def __init__(self, driver: WebElement, raceId: int) -> None:
         super().__init__(driver, raceId)
+        with mySqlObject() as connection:
+            connection.useDatabase('biathlon')
+            self.raceDescription: str = connection.executeAndFetch(
+                f"SELECT description FROM race WHERE idRace='{raceId}';")[0][0]
 
     @typechecked
     def getAllAthleteFields(self) -> Tuple[List[WebElement], List[str]]:
@@ -30,7 +34,7 @@ class getLoopTimesRelay(getLoopTimes):
 
     @typechecked
     @staticmethod
-    def getAthletesRelayId(idRace: int, athleteNumber: str) -> List[int]:
+    def getAthletesRelayId(idRace: int, athleteNumber: str, raceDescription: str) -> List[int]:
         if athleteNumber == 'Σ':
             idQuery: str = f'SELECT athletesId FROM raceResultsRelayAthletes ra WHERE (SELECT rn.idRace FROM raceResultsRelayNation rn WHERE ra.idRaceResultsRelayNation = rn.idraceResultsRelayNation) = {idRace}'
 
@@ -43,7 +47,10 @@ class getLoopTimesRelay(getLoopTimes):
 
         idAthletes: List[int] = list(map(lambda x: x[0], idQueried))
 
-        return idAthletes
+        if raceDescription == 'Single Mixed Relay' and athleteNumber != 'Σ':
+            return idAthletes[::2]
+        else:
+            return idAthletes
 
     @typechecked
     def getLoopTableRelay(self, athleteNumber: str, loopNumber: str) -> pd.DataFrame:
@@ -56,8 +63,12 @@ class getLoopTimesRelay(getLoopTimes):
 
             dfAthlete = dfAthlete.drop(
                 columns=['Rank', 'Bib', 'Country'])
-            timeColumns = ['Cumulative Time',
-                           'Loop Time', 'Course Time']
+            if loopNumber == '3':
+                timeColumns = ['Cumulative Time',
+                               'Loop Time', 'Course Time']
+            else:
+                timeColumns = ['Cumulative Time',
+                               'Loop Time', 'Course Time', 'Penalty Time']
 
             for column in timeColumns:
                 dfAthlete[column] = self.handleTimeColumn(
@@ -67,15 +78,22 @@ class getLoopTimesRelay(getLoopTimes):
                 lambda x: retrieveRaceResults.getAlpha3(x))
             dfAthlete: pd.DataFrame = dfAthlete.drop(columns='Nation')
         else:
+            if int(athleteNumber) > 2 and self.raceDescription == 'Single Mixed Relay':
+                athleteNumber = str(int(athleteNumber) - 2)
             dfAthlete: pd.DataFrame = dfAthlete.drop(
                 columns=['Rank', 'Bib', 'Family\xa0Name', 'Given Name', 'Nation'])
             for column in dfAthlete.columns:
                 dfAthlete[column] = self.handleTimeColumn(
                     columnName=column, df=dfAthlete)
             athletesId: List[int] = self.getAthletesRelayId(
-                idRace=self.raceId, athleteNumber=athleteNumber)
+                idRace=self.raceId, athleteNumber=athleteNumber, raceDescription=self.raceDescription)
+            print(athletesId, dfAthlete, athleteNumber)
+            print(len(athletesId), len(
+                dfAthlete))
+
             assert len(athletesId) == len(
                 dfAthlete), "Number of athletes and ids differ"
+
             dfAthlete['athletesId'] = athletesId
 
         dfAthlete.columns = list(

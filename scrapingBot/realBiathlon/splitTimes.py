@@ -66,7 +66,7 @@ class splitTimesHandle:
         allSplitTimesDf: List[pd.DataFrame] = []
 
         for text in textOptions:
-
+            self.drvr.refresh()
             self.goToSplitTimesSection(textOption=text)
             tableHtml: str = self.drvr.find_element(
                 By.ID, 'thistable').get_attribute('innerHTML')

@@ -70,7 +70,7 @@ class analysisHandleRelay(analysisHandle):
             print(finalAnalysisDf[columnRank][0],
                   type(finalAnalysisDf[columnRank][0]))
             finalAnalysisDf[columnRank] = finalAnalysisDf[columnRank].apply(
-                lambda x: x if x.isdigit() else None)
+                lambda x: x if str(x).isdigit() else None)
 
         finalAnalysisDf['lapped'] = finalAnalysisDf['totalcourseTimeRankCourseTime'].apply(
             lambda x: True if x == 'LAP' else False)

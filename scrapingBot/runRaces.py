@@ -23,6 +23,7 @@ if TYPE_CHECKING:
     from realBiathlon.loopTimesRelay import getLoopTimesRelay
     from realBiathlon.shooting import getShooting
     from realBiathlon.shootingRelay import getShootingRelay
+    from realBiathlon.races import races
 
 logging.basicConfig(filename='bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
@@ -32,7 +33,7 @@ logging.basicConfig(filename='bot.log', level=logging.INFO,
 ################################
 
 ###############################################################################
-# Remember to make got a static method so that it can be reused across modules #
+# Remember to make "get" a static method so that it can be reused across modules #
 ###############################################################################
 
 ###############################################################
@@ -44,6 +45,7 @@ level: str = 'World'
 
 
 with races(teardown=True, year=year, level=level) as botRace:
+    botRace: Type["races"]
     botRace.implicitly_wait(15)
 
     botRace.landInRealBiathlon()
@@ -61,12 +63,14 @@ with races(teardown=True, year=year, level=level) as botRace:
     logging.info("Starting bot...")
 
     for indexStage, stageId in enumerate(stageRaceDict.keys()):
-        logging.debug(f'Entered handling of stage with id: {stageId}')
+
+        logging.info(f'Entered handling of stage with id: {stageId}')
         #
         # raceId, statusRealBiathlon = stageRaceDict[stageId][raceExample]
         for indexRace, (raceId, statusRealBiathlon) in enumerate(stageRaceDict[stageId]):
-            logging.debug(f'Entered handling of race with id: {raceId}')
-            logging.debug(f'Race biathlon\'s status is {statusRealBiathlon}')
+            logging.info(f'Entered handling of race with id: {raceId}')
+            logging.info(
+                f'Race biathlon\'s status is {statusRealBiathlon}')
             # print(stageRaceDict[stageId])
 
             # stageExampleId: int = list(stageRaceDict.keys())[stageExample]
@@ -82,9 +86,9 @@ with races(teardown=True, year=year, level=level) as botRace:
 
             insertStatus: str = botRace.getRaceInsertStatus(raceId=raceId)
 
-            logging.debug(
+            logging.info(
                 f'The race \'s status of the data base is {statusDb}')
-            logging.debug(f'Insert status is {insertStatus}')
+            logging.info(f'Insert status is {insertStatus}')
 
             if insertStatus != 'inserted':
 
@@ -97,10 +101,10 @@ with races(teardown=True, year=year, level=level) as botRace:
                 ######################
 
                 if statusRealBiathlon == 'Final':
-
+                    '''
                     if generalCategory == 'Non-Team':
 
-                        logging.debug(
+                        logging.info(
                             'Entered raceResults for Non-Team category')
 
                         botRace.clickRace(stagePosition=indexStage,
@@ -117,9 +121,13 @@ with races(teardown=True, year=year, level=level) as botRace:
                         botRace.insertIntoTableDf(
                             tableName='raceResults', df=dfResults)
 
+                        logging.info(
+                            f"Inserted race results for race having id {raceId}")
+
                     if generalCategory == 'Team':
 
-                        logging.debug('Entered raceResults for Team category')
+                        logging.info(
+                            'Entered raceResults for Team category')
 
                         botRace.clickRace(stagePosition=indexStage,
                                           racePosition=indexRace)
@@ -141,6 +149,9 @@ with races(teardown=True, year=year, level=level) as botRace:
                         botRace.insertIntoTableDf(
                             tableName='raceResultsRelayNation', df=raceResultsNationDf)
 
+                        logging.info(
+                            f"Inserted race results (Nations) for race having id {raceId}")
+
                         raceResultsAthletesDf: pd.DataFrame = raceResults.getResultsAthletesTeam(
                             df=dfResultsTeam)
 
@@ -151,16 +162,21 @@ with races(teardown=True, year=year, level=level) as botRace:
                         botRace.insertIntoTableDf(
                             tableName='raceResultsRelayAthletes', df=raceResultsAthletesDf)
 
+                        logging.info(
+                            f"Inserted race results (Athletes) for race having id {raceId}")
+                    '''
+                    botRace.clickRace(stagePosition=indexStage,
+                                      racePosition=indexRace)
                     clickableSections: List[str] = botRace.getAllClickableSections(
                     )
-
+                    '''
                     if 'Loop Times' in clickableSections:
 
                         logging.info('loop Times is in clickable sections')
 
                         if generalCategory == 'Non-Team':
 
-                            logging.debug(
+                            logging.info(
                                 'Entered Loop Times for Non-Team category')
 
                             loopHandler: Type = botRace.getLoopTimes(
@@ -189,8 +205,11 @@ with races(teardown=True, year=year, level=level) as botRace:
                                 botRace.insertIntoTableDf(
                                     tableName='loopsTable', df=loopDf)
 
+                                logging.info(
+                                    f"Inserted loop Times for race having id {raceId}")
+
                         if generalCategory == 'Team':
-                            logging.debug(
+                            logging.info(
                                 'Entered Loop Times for Team category')
 
                             loopHandler: Type["getLoopTimesRelay"] = botRace.getLoopTimesRelay(
@@ -214,7 +233,8 @@ with races(teardown=True, year=year, level=level) as botRace:
 
                                     loopHandler.clickElement(loopElement)
 
-                                    loopHandler.clickElement(athleteElement)
+                                    loopHandler.clickElement(
+                                        athleteElement)
 
                                     dfAthlete: pd.DataFrame = loopHandler.getLoopTableRelay(
                                         athleteNumber=athleteText, loopNumber=loopText)
@@ -226,13 +246,16 @@ with races(teardown=True, year=year, level=level) as botRace:
                                     botRace.insertIntoTableDf(
                                         tableName='loopsTableRelay', df=dfAthlete)
 
+                                    logging.info(
+                                        f"Inserted loops id {raceId}")
+
                     if 'Shooting' in clickableSections:
 
                         logging.info('Shooting is in clickable sections')
 
                         if generalCategory == 'Non-Team':
 
-                            logging.debug(
+                            logging.info(
                                 'Entered shooting for Non-Team category')
 
                             shootingHandler: Type["getShooting"] = botRace.getShootingResults(
@@ -252,9 +275,12 @@ with races(teardown=True, year=year, level=level) as botRace:
                                 botRace.insertIntoTableDf(
                                     tableName='shooting', df=df)
 
+                            logging.info(
+                                f"Inserted Shooting for race having id {raceId}")
+
                         if generalCategory == 'Team':
 
-                            logging.debug(
+                            logging.info(
                                 'Entered Shooting for Team category')
 
                             shootingHandlerRelay: Type["getShootingRelay"] = botRace.getShootingResultsRelay(
@@ -274,13 +300,16 @@ with races(teardown=True, year=year, level=level) as botRace:
                                 botRace.insertIntoTableDf(
                                     tableName='shooting', df=df)
 
+                            logging.info(
+                                f"Inserted race Shooting for race having id {raceId}")
+
                     if 'Analysis' in clickableSections:
 
                         logging.info('Analysis is in clickable sections')
 
                         if generalCategory == 'Non-Team':
 
-                            logging.debug(
+                            logging.info(
                                 'Entered Analysis for Non-Team category')
 
                             analysisHandler: Type["analysisHandle"] = botRace.getAnalysis(
@@ -295,11 +324,16 @@ with races(teardown=True, year=year, level=level) as botRace:
                             ##########################
                             # Insert Analysis Result #
                             ##########################
-                            # botRace.insertIntoTableDf(
-                            #   tableName='analysis', df=finalAnalysisDf)
+                            botRace.insertIntoTableDf(
+                                tableName='analysis', df=finalAnalysisDf)
+
+                            logging.info(
+                                f"Inserted Analysis for race having id {raceId}")
+
                         if generalCategory == 'Team':
 
-                            logging.debug('Entered Analysis for Team category')
+                            logging.info(
+                                'Entered Analysis for Team category')
 
                             analysisHandlerRelay: Type["analysisHandle"] = botRace.getAnalysisRelay(
                                 raceId=raceId)
@@ -314,13 +348,16 @@ with races(teardown=True, year=year, level=level) as botRace:
                             botRace.insertIntoTableDf(
                                 tableName='analysisRelay', df=finalAnalysisDfRelay)
 
+                            logging.info(
+                                f"Inserted Analysis for race having id {raceId}")
+
                     if 'Split Times' in clickableSections:
 
                         logging.info('Split Times is in clickable section')
 
                         if generalCategory == 'Non-Team':
 
-                            logging.debug(
+                            logging.info(
                                 'Entered Split Times for Non-Team category')
 
                             splitTimesHandler: "splitTimesHandle" = botRace.getSplitTimes(
@@ -335,9 +372,13 @@ with races(teardown=True, year=year, level=level) as botRace:
 
                             botRace.insertIntoTableDf(
                                 tableName='splitTimes', df=splitTimesDf)
+
+                            logging.info(
+                                f"Inserted Split Times for race having id {raceId}")
+
                         if generalCategory == 'Team':
 
-                            logging.debug(
+                            logging.info(
                                 'Entered Split Times for Team category')
 
                             splitTimesHandlerRelay: "splitTimesHandleRelay" = botRace.getSplitTimesRelay(
@@ -354,6 +395,9 @@ with races(teardown=True, year=year, level=level) as botRace:
                             botRace.insertIntoTableDf(
                                 tableName='splitTimes', df=splitTimesDfRelay)
 
+                            logging.info(
+                                f"Inserted Analysis for race having id {raceId}")
+                    '''
                     if 'Metadata' in clickableSections:
 
                         logging.info('Metadata is in clickable sections')
@@ -372,4 +416,20 @@ with races(teardown=True, year=year, level=level) as botRace:
                         botRace.insertIntoTableDf(
                             tableName='metadata', df=metadataDf)
 
+                        logging.info(
+                            f"Inserted Metadata for race having id {raceId}")
+                else:
+                    continue
+            else:
+                continue
+
             botRace.setInstertState(raceId=raceId)
+            logging.info(f'Inserted race with id {raceId}')
+
+            botRace.landInRealBiathlon()
+
+            botRace.goToRaces()
+
+            botRace.selectYear()
+
+            botRace.selectLevel()
