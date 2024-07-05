@@ -1,0 +1,251 @@
+Country,ISO 3166-1 alpha2,ISO 3166-1 alpha3,IOC,Fips 10,License Plate,Domain
+Afghanistan,AF,AFG,AFG,AF,AFG,.af
+Åland Islands,AX,ALA,,,AX,.ax
+Albania,AL,ALB,ALB,AL,AL,.al
+Algeria,DZ,DZA,ALG,AG,DZ,.dz
+American Samoa,AS,ASM,ASA,AQ,USA,.as
+Andorra,AD,AND,AND,AN,AND,.ad
+Angola,AO,AGO,ANG,AO,ANG,.ao
+Anguilla,AI,AIA,,AV,AXA,.ai
+Antarctica,AQ,ATA,,AY,,.aq
+Antigua and Barbuda,AG,ATG,ANT,AC,AG,.ag
+Argentina,AR,ARG,ARG,AR,RA,.ar
+Armenia,AM,ARM,ARM,AM,AM,.am
+Aruba,AW,ABW,ARU,AA,ARU,.aw
+Australia,AU,AUS,AUS,AS,AUS,.au
+Austria,AT,AUT,AUT,AU,A,.at
+Azerbaijan,AZ,AZE,AZE,AJ,AZ,.az
+Bahamas,BS,BHS,BAH,BF,BS,.bs
+Bahrain,BH,BHR,BRN,BA,BRN,.bh
+Bangladesh,BD,BGD,BAN,BG,BD,.bd
+Barbados,BB,BRB,BAR,BB,BDS,.bb
+Belarus,BY,BLR,BLR,BO,BY,.by
+Belgium,BE,BEL,BEL,BE,B,.be
+Belize,BZ,BLZ,BIZ,BH,BZ,.bz
+Benin,BJ,BEN,BEN,BN,BJ,.bj
+Bermuda,BM,BMU,BER,BD,,.bm
+Bhutan,BT,BTN,BHU,BT,BHT,.bt
+Bolivia,BO,BOL,BOL,BL,BOL,.bo
+Bosnia and Herzegovina,BA,BIH,BIH,BK,BIH,.ba
+Botswana,BW,BWA,BOT,BC,RB,.bw
+Bouvet Island,BV,BVT,,BV,,.bv
+Brazil,BR,BRA,BRA,BR,BR,.br
+British Indian Ocean Territory,IO,IOT,,IO,,.io
+British Virgin Islands,VG,VGB,IVB,VI,VG,.vg
+Brunei,BN,BRN,BRU,BX,BRU,.bn
+Bulgaria,BG,BGR,BUL,BU,BG,.bg
+Burkina Faso,BF,BFA,BUR,UV,BF,.bf
+Burundi,BI,BDI,BDI,BY,RU,.bi
+Cambodia,KH,KHM,CAM,CB,K,.kh
+Cameroon,CM,CMR,CMR,CM,CAM,.cm
+Canada,CA,CAN,CAN,CA,CDN,.ca
+Cape Verde,CV,CPV,CPV,CV,CV,.cv
+Caribbean Netherlands,BQ,BES,,,NL,.bq
+Cayman Islands,KY,CYM,CAY,CJ,,.ky
+Central African Republic,CF,CAF,CAF,CT,RCA,.cf
+Chad,TD,TCD,CHA,CD,TD,.td
+Chile,CL,CHL,CHI,CI,RCH,.cl
+China,CN,CHN,CHN,CH,CHN,.cn
+Christmas Island,CX,CXR,,KT,,.cx
+Cocos (Keeling) Islands,CC,CCK,,CK,,.cc
+Colombia,CO,COL,COL,CO,CO,.co
+Comoros,KM,COM,COM,CN,COM,.km
+Cook Islands,CK,COK,COK,CW,,.ck
+Costa Rica,CR,CRI,CRC,CS,CR,.cr
+Croatia,HR,HRV,CRO,HR,HR,.hr
+Cuba,CU,CUB,CUB,CU,C,.cu
+Curacao,CW,CUW,,UC,,.cw
+Cyprus,CY,CYP,CYP,CY,CY,.cy
+Czechia,CZ,CZE,CZE,EZ,CZ,.cz
+Democratic Republic of the Congo,CD,COD,COD,CG,CGO,.cd
+Denmark,DK,DNK,DEN,DA,DK,.dk
+Djibouti,DJ,DJI,DJI,DJ,DJI,.dj
+Dominica,DM,DMA,DMA,DO,WD,.dm
+Dominican Republic,DO,DOM,DOM,DR,DOM,.do
+East Timor,TL,TLS,TLS,TT,TL,.tl
+Ecuador,EC,ECU,ECU,EC,EC,.ec
+Egypt,EG,EGY,EGY,EG,ET,.eg
+El Salvador,SV,SLV,ESA,ES,ES,.sv
+Equatorial Guinea,GQ,GNQ,GEQ,EK,GQ,.gq
+Eritrea,ER,ERI,ERI,ER,ER,.er
+Estonia,EE,EST,EST,EN,EST,.ee
+Eswatini,SZ,SWZ,SWZ,WZ,SD,.sz
+Ethiopia,ET,ETH,ETH,ET,ETH,.et
+Falkland Islands,FK,FLK,,FK,,.fk
+Faroe Islands,FO,FRO,,FO,FO,.fo
+Federated States of Micronesia,FM,FSM,FSM,FM,FSM,.fm
+Fiji,FJ,FJI,FIJ,FJ,FJI,.fj
+Finland,FI,FIN,FIN,FI,FIN,.fi
+France,FR,FRA,FRA,FR,F,.fr
+French Guiana,GF,GUF,,FG,,.gf
+French Polynesia,PF,PYF,,FP,,.pf
+French Southern and Antarctic Lands,TF,ATF,,FS,,.tf
+Gabon,GA,GAB,GAB,GB,G,.ga
+Gambia,GM,GMB,GAM,GA,WAG,.gm
+Georgia,GE,GEO,GEO,GG,GE,.ge
+Germany,DE,DEU,GER,GM,D,.de
+Ghana,GH,GHA,GHA,GH,GH,.gh
+Gibraltar,GI,GIB,,GI,GBZ,.gi
+Greece,GR,GRC,GRE,GR,GR,.gr
+Greenland,GL,GRL,,GL,KN,.gl
+Grenada,GD,GRD,GRN,GJ,WG,.gd
+Guadeloupe,GP,GLP,,GP,,.gp
+Guam,GU,GUM,GUM,GQ,,.gu
+Guatemala,GT,GTM,GUA,GT,GCA,.gt
+Guernsey,GG,GGY,,GK,GBG,.gg
+Guinea,GN,GIN,GUI,GV,RG,.gn
+Guinea-Bissau,GW,GNB,GBS,PU,GUB,.gw
+Guyana,GY,GUY,GUY,GY,GUY,.gy
+Haiti,HT,HTI,HAI,HA,RH,.ht
+Heard Island and McDonald Islands,HM,HMD,,HM,,.hm
+Honduras,HN,HND,HON,HO,HN,.hn
+Hong Kong,HK,HKG,HKG,HK,HK,.hk
+Hungary,HU,HUN,HUN,HU,H,.hu
+Iceland,IS,ISL,ISL,IC,IS,.is
+India,IN,IND,IND,IN,IND,.in
+Indonesia,ID,IDN,INA,ID,RI,.id
+Iran,IR,IRN,IRI,IR,IR,.ir
+Iraq,IQ,IRQ,IRQ,IZ,IRQ,.iq
+Ireland,IE,IRL,IRL,EI,IRL,.ie
+Isle of Man,IM,IMN,,,GBM,.im
+Israel,IL,ISR,ISR,IS,IL,.il
+Italy,IT,ITA,ITA,IT,I,.it
+Ivory Coast,CI,CIV,CIV,IV,CI,.ci
+Jamaica,JM,JAM,JAM,JM,JA,.jm
+Japan,JP,JPN,JPN,JA,J,.jp
+Jersey,JE,JEY,,JE,GBJ,.je
+Jordan,JO,JOR,JOR,JO,JOR,.jo
+Kazakhstan,KZ,KAZ,KAZ,KZ,KZ,.kz
+Kenya,KE,KEN,KEN,KE,EAK,.ke
+Kiribati,KI,KIR,KIR,KR,KIR,.ki
+Kosovo,XK,XXK,KOS,KV,RKS,.ko
+Kuwait,KW,KWT,KUW,KU,KWT,.kw
+Kyrgyzstan,KG,KGZ,KGZ,KG,KS,.kg
+Laos,LA,LAO,LAO,LA,LAO,.la
+Latvia,LV,LVA,LAT,LG,LV,.lv
+Lebanon,LB,LBN,LBN,LE,RL,.lb
+Lesotho,LS,LSO,LES,LT,LS,.ls
+Liberia,LR,LBR,LBR,LI,LB,.lr
+Libya,LY,LBY,LBA,LY,LAR,.ly
+Liechtenstein,LI,LIE,LIE,LS,FL,.li
+Lithuania,LT,LTU,LTU,LH,LT,.lt
+Luxembourg,LU,LUX,LUX,LU,L,.lu
+Macao,MO,MAC,,MC,,.mo
+Madagascar,MG,MDG,MAD,MA,RM,.mg
+Malawi,MW,MWI,MAW,MI,MW,.mw
+Malaysia,MY,MYS,MAS,MY,MAL,.my
+Maldives,MV,MDV,MDV,MV,MV,.mv
+Mali,ML,MLI,MLI,ML,RMM,.ml
+Malta,MT,MLT,MLT,MT,M,.mt
+Marshall Islands,MH,MHL,MHL,RM,MH,.mh
+Martinique,MQ,MTQ,,MB,,.mq
+Mauritania,MR,MRT,MTN,MR,RIM,.mr
+Mauritius,MU,MUS,MRI,MP,MS,.mu
+Mayotte,YT,MYT,,MF,,.yt
+Mexico,MX,MEX,MEX,MX,MEX,.mx
+Moldova,MD,MDA,MDA,MD,MD,.md
+Mongolia,MN,MNG,MGL,MG,MGL,.mn
+Montenegro,ME,MNE,MNE,MJ,MNE,.me
+Montserrat,MS,MSR,,MH,,.ms
+Morocco,MA,MAR,MAR,MO,MA,.ma
+Mozambique,MZ,MOZ,MOZ,MZ,MOC,.mz
+Myanmar,MM,MMR,MYA,BM,MYA,.mm
+Namibia,,NAM,NAM,WA,NAM,.na
+Nauru,NR,NRU,NRU,NR,NAU,.nr
+Nepal,NP,NPL,NEP,NP,NEP,.np
+Netherlands,NL,NLD,NED,NL,NL,.nl
+New Caledonia,NC,NCL,,NC,NCL,.nc
+New Zealand,NZ,NZL,NZL,NZ,NZ,.nz
+Nicaragua,NI,NIC,NCA,NU,NIC,.ni
+Niger,NE,NER,NIG,NG,RN,.ne
+Nigeria,NG,NGA,NGR,NI,NGR,.ng
+Niue,NU,NIU,,NE,,.nu
+Norfolk Island,NF,NFK,,NF,,.nf
+North Korea,KP,PRK,PRK,KN,KP,.kp
+North Macedonia,MK,MKD,MKD,MK,MK,.mk
+Northern Mariana Islands,MP,MNP,,CQ,,.mp
+Norway,NO,NOR,NOR,NO,N,.no
+Oman,OM,OMN,OMA,MU,OM,.om
+Pakistan,PK,PAK,PAK,PK,PK,.pk
+Palau,PW,PLW,PLW,PS,PAL,.pw
+Palestine,PS,PSE,PLE,WE,WB,.ps
+Panama,PA,PAN,PAN,PM,PA,.pa
+Papua New Guinea,PG,PNG,PNG,PP,PNG,.pg
+Paraguay,PY,PRY,PAR,PA,PY,.py
+Peru,PE,PER,PER,PE,PE,.pe
+Philippines,PH,PHL,PHI,RP,RP,.ph
+Pitcairn Islands,PN,PCN,,PC,,.pn
+Poland,PL,POL,POL,PL,PL,.pl
+Portugal,PT,PRT,POR,PO,P,.pt
+Principality of Monaco,MC,MCO,MON,MN,MC,.mc
+Puerto Rico,PR,PRI,PUR,RQ,PRI,.pr
+Qatar,QA,QAT,QAT,QA,Q,.qa
+Republic of the Congo,CG,COG,CGO,CF,RCB,.cg
+Reunion,RE,REU,,RE,,.re
+Romania,RO,ROU,ROU,RO,RO,.ro
+Russia,RU,RUS,RUS,RS,RUS,.ru
+Rwanda,RW,RWA,RWA,RW,RWA,.rw
+Saint Barthelemy,BL,BLM,,TB,,.bl
+"Saint Helena, Ascension and Tristan da Cunha",SH,SHN,,SH,,.sh
+Saint Kitts and Nevis,KN,KNA,SKN,SC,KAN,.kn
+Saint Lucia,LC,LCA,LCA,ST,WL,.lc
+Saint Martin,MF,MAF,,RN,F,.mf
+Saint Pierre and Miquelon,PM,SPM,,SB,,.pm
+Saint Vincent and the Grenadines,VC,VCT,VIN,VC,WV,.vc
+Samoa,WS,WSM,SAM,WS,WS,.ws
+San Marino,SM,SMR,SMR,SM,RSM,.sm
+Sao Tome and Principe,ST,STP,STP,TP,STP,.st
+Saudi Arabia,SA,SAU,KSA,SA,KSA,.sa
+Senegal,SN,SEN,SEN,SG,SN,.sn
+Serbia,RS,SRB,SRB,RI,SRB,.rs
+Seychelles,SC,SYC,SEY,SE,SY,.sc
+Sierra Leone,SL,SLE,SLE,SL,WAL,.sl
+Singapore,SG,SGP,SGP,SN,SGP,.sg
+Sint Maarten,SX,SXM,,NN,,.sx
+Slovakia,SK,SVK,SVK,LO,SK,.sk
+Slovenia,SI,SVN,SLO,SI,SLO,.si
+Solomon Islands,SB,SLB,SOL,BP,SOL,.sb
+Somalia,SO,SOM,SOM,SO,SO,.so
+South Africa,ZA,ZAF,RSA,SF,ZA,.za
+South Georgia and South Sandwich Islands,GS,SGS,,SX,,.gs
+South Korea,KR,KOR,KOR,KS,ROK,.kr
+South Sudan,SS,SSD,,,SSD,.ss
+Spain,ES,ESP,ESP,SP,E,.es
+Sri Lanka,LK,LKA,SRI,CE,CL,.lk
+Sudan,SD,SDN,SUD,SU,SUD,.sd
+Suriname,SR,SUR,SUR,NS,SME,.sr
+Svalbard,SJ,SJM,,SV,,.sj
+Sweden,SE,SWE,SWE,SW,S,.se
+Switzerland,CH,CHE,SUI,SZ,CH,.ch
+Syria,SY,SYR,SYR,SY,SYR,.sy
+Taiwan,TW,TWN,TPE,TW,RC,.tw
+Tajikistan,TJ,TJK,TJK,TI,TJ,.tj
+Tanzania,TZ,TZA,TAN,TZ,EAT,.tz
+Thailand,TH,THA,THA,TH,T,.th
+Togo,TG,TGO,TOG,TO,TG,.tg
+Tokelau,TK,TKL,,TL,,.tk
+Tonga,TO,TON,TGA,TN,TON,.to
+Trinidad and Tobago,TT,TTO,TTO,TD,TT,.tt
+Tunisia,TN,TUN,TUN,TS,TN,.tn
+Turkey,TR,TUR,TUR,TU,TR,.tr
+Turkmenistan,TM,TKM,TKM,TX,TM,.tm
+Turks and Caicos Islands,TC,TCA,,TK,,.tc
+Tuvalu,TV,TUV,TUV,TV,TUV,.tv
+Uganda,UG,UGA,UGA,UG,EAU,.ug
+Ukraine,UA,UKR,UKR,UP,UA,.ua
+United Arab Emirates,AE,ARE,UAE,AE,UAE,.ae
+United Kingdom,GB,GBR,GBR,UK,UK,.uk
+United States Minor Outlying Islands,UM,UMI,,UM,,.us
+United States of America,US,USA,USA,US,USA,.us
+Uruguay,UY,URY,URU,UY,ROU,.uy
+Uzbekistan,UZ,UZB,UZB,UZ,UZ,.uz
+Vanuatu,VU,VUT,VAN,NH,VAN,.vu
+Vatican City,VA,VAT,,VT,V,.va
+Venezuela,VE,VEN,VEN,VE,YV,.ve
+Vietnam,VN,VNM,VIE,VM,VN,.vn
+Virgin Islands,VI,VIR,ISV,VQ,,.vi
+Wallis and Futuna,WF,WLF,,WF,,.wf
+Western Sahara,EH,ESH,,WI,WSA,.eh
+Yemen,YE,YEM,YEM,YM,YEM,.ye
+Zambia,ZM,ZMB,ZAM,ZA,Z,.zm
+Zimbabwe,ZW,ZWE,ZIM,ZI,ZW,.zw
